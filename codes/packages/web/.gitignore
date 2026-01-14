@@ -1,0 +1,27 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Dependencies
+node_modules
+
+# Build
+dist
+dist-ssr
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea
+
+# Local env files
+.env.local
+.env.*.local
+
+# Test results
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+coverage/

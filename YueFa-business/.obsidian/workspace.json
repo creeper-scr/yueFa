@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "产品需求文档PRD v1.0.md",
+                "file": "约发MVP系统架构与开发计划.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "产品需求文档PRD v1.0"
+              "title": "约发MVP系统架构与开发计划"
             }
           }
         ],
@@ -125,7 +125,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "产品需求文档PRD v1.0.md",
+                "file": "约发MVP系统架构与开发计划.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -135,7 +135,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "产品需求文档PRD v1.0 的反向链接列表"
+              "title": "约发MVP系统架构与开发计划 的反向链接列表"
             }
           },
           {
@@ -144,12 +144,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "产品需求文档PRD v1.0.md",
+                "file": "约发MVP系统架构与开发计划.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "产品需求文档PRD v1.0 的出链列表"
+              "title": "约发MVP系统架构与开发计划 的出链列表"
             }
           },
           {
@@ -187,13 +187,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "产品需求文档PRD v1.0.md",
+                "file": "约发MVP系统架构与开发计划.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "产品需求文档PRD v1.0 的大纲"
+              "title": "约发MVP系统架构与开发计划 的大纲"
             }
           }
         ]
@@ -216,8 +216,9 @@
   },
   "active": "81e39e921fd435d3",
   "lastOpenFiles": [
-    "产品需求文档PRD-MVP精简版.md",
     "产品需求文档PRD v1.0.md",
+    "约发MVP系统架构与开发计划.md",
+    "产品需求文档PRD-MVP精简版.md",
     "毛娘工作流痛点与行业进化调研报告.md",
     "行动纲领.md",
     "欢迎.md"

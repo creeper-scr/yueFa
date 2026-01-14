@@ -1,0 +1,20 @@
+{
+  "name": "yuefa",
+  "version": "1.0.0",
+  "description": "约发 - Cosplay假发造型师的移动端H5工具",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm -r --parallel dev",
+    "dev:web": "pnpm --filter @yuefa/web dev",
+    "dev:server": "pnpm --filter @yuefa/server dev",
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "test:web": "pnpm --filter @yuefa/web test",
+    "test:server": "pnpm --filter @yuefa/server test",
+    "lint": "pnpm -r lint"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "packageManager": "pnpm@8.15.0"
+}
