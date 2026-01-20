@@ -118,7 +118,7 @@ const createTables = () => {
     )
   `)
 
-  // 询价表
+  // 询价表 (PRD 2.0 升级)
   db.run(`
     CREATE TABLE IF NOT EXISTS inquiries (
       id TEXT PRIMARY KEY,
@@ -129,16 +129,18 @@ const createTables = () => {
       source_work TEXT,
       expected_deadline TEXT,
       head_circumference TEXT,
+      head_notes TEXT,
+      wig_source TEXT DEFAULT 'client_sends',
       budget_range TEXT,
       reference_images TEXT,
-      requirements TEXT,
+      special_requirements TEXT,
       status TEXT DEFAULT 'new',
       created_at TEXT DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id)
     )
   `)
 
-  // 订单表
+  // 订单表 (PRD 2.0 核心升级 - 9状态流转)
   db.run(`
     CREATE TABLE IF NOT EXISTS orders (
       id TEXT PRIMARY KEY,
@@ -148,18 +150,84 @@ const createTables = () => {
       customer_contact TEXT,
       character_name TEXT NOT NULL,
       source_work TEXT,
-      deadline TEXT,
+      reference_images TEXT,
       head_circumference TEXT,
+      head_notes TEXT,
+
+      -- 毛坯管理 (PRD F-03)
+      wig_source TEXT DEFAULT 'client_sends',
+      wig_tracking_no TEXT,
+      wig_received_at TEXT,
+      wig_purchase_fee REAL,
+
+      -- 价格信息 (PRD F-02)
       price REAL,
       deposit REAL,
-      reference_images TEXT,
-      requirements TEXT,
-      status TEXT DEFAULT 'pending_deposit',
+      balance REAL,
+      deposit_paid_at TEXT,
+      deposit_screenshot TEXT,
+      balance_paid_at TEXT,
+      balance_screenshot TEXT,
+
+      -- 工期管理 (PRD B-02)
+      deadline TEXT,
+
+      -- 发货信息 (PRD S-01)
+      shipping_no TEXT,
+      shipping_company TEXT,
+      shipped_at TEXT,
+      shipping_checklist TEXT,
+
+      -- 制作笔记 (PRD B-03)
+      production_notes TEXT,
+
+      -- 备注
       notes TEXT,
+
+      -- 订单状态 (PRD 2.0 九状态)
+      status TEXT DEFAULT 'pending_quote',
+
       created_at TEXT DEFAULT CURRENT_TIMESTAMP,
       updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id),
       FOREIGN KEY (inquiry_id) REFERENCES inquiries(id)
+    )
+  `)
+
+  // 验收记录表 (PRD R-01 新增)
+  db.run(`
+    CREATE TABLE IF NOT EXISTS reviews (
+      id TEXT PRIMARY KEY,
+      order_id TEXT NOT NULL,
+      images TEXT NOT NULL,
+      description TEXT,
+      review_token TEXT UNIQUE,
+      review_url TEXT,
+      is_approved INTEGER,
+      approved_at TEXT,
+      max_revisions INTEGER DEFAULT 2,
+      revision_count INTEGER DEFAULT 0,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (order_id) REFERENCES orders(id)
+    )
+  `)
+
+  // 修改记录表 (PRD R-02 新增)
+  db.run(`
+    CREATE TABLE IF NOT EXISTS review_revisions (
+      id TEXT PRIMARY KEY,
+      review_id TEXT NOT NULL,
+      revision_number INTEGER NOT NULL,
+      request_content TEXT NOT NULL,
+      request_images TEXT,
+      requested_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      response_images TEXT,
+      response_notes TEXT,
+      completed_at TEXT,
+      is_satisfied INTEGER,
+      confirmed_at TEXT,
+      FOREIGN KEY (review_id) REFERENCES reviews(id)
     )
   `)
 
@@ -183,7 +251,11 @@ const createTables = () => {
   db.run(`CREATE INDEX IF NOT EXISTS idx_inquiries_status ON inquiries(status)`)
   db.run(`CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(user_id)`)
   db.run(`CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status)`)
+  db.run(`CREATE INDEX IF NOT EXISTS idx_orders_deadline ON orders(deadline)`)
   db.run(`CREATE INDEX IF NOT EXISTS idx_sms_codes_phone ON sms_codes(phone)`)
+  db.run(`CREATE INDEX IF NOT EXISTS idx_reviews_order_id ON reviews(order_id)`)
+  db.run(`CREATE INDEX IF NOT EXISTS idx_reviews_token ON reviews(review_token)`)
+  db.run(`CREATE INDEX IF NOT EXISTS idx_revisions_review_id ON review_revisions(review_id)`)
 }
 
 export default { initDb, getDb, saveDb, runQuery, selectQuery, selectOne }

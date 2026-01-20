@@ -106,5 +106,33 @@ config.global.stubs = {
   },
   'van-dialog': {
     template: '<div class="van-dialog"><slot /></div>'
+  },
+  'van-radio': {
+    template: '<label class="van-radio"><input type="radio" :name="name" :value="name" /><slot /></label>',
+    props: ['name']
+  },
+  'van-radio-group': {
+    template: '<div class="van-radio-group"><slot /></div>',
+    props: ['modelValue', 'direction'],
+    emits: ['update:modelValue']
+  },
+  'van-checkbox': {
+    template: '<label class="van-checkbox"><input type="checkbox" :checked="modelValue" /><slot /></label>',
+    props: ['modelValue'],
+    emits: ['update:modelValue']
+  },
+  'van-pull-refresh': {
+    template: '<div class="van-pull-refresh"><slot /></div>',
+    props: ['modelValue'],
+    emits: ['refresh', 'update:modelValue']
+  },
+  'van-list': {
+    template: '<div class="van-list"><slot /></div>',
+    props: ['loading', 'finished', 'finishedText'],
+    emits: ['update:loading', 'load']
+  },
+  'van-cell': {
+    template: '<div class="van-cell"><slot /></div>',
+    props: ['title', 'value']
   }
 }

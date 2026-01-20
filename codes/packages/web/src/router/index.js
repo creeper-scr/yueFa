@@ -8,6 +8,13 @@ const routes = [
     component: () => import('@/views/client/PublicPage.vue'),
     meta: { title: '毛娘主页' }
   },
+  // 客户端验收页面 (PRD R-01)
+  {
+    path: '/review/:token',
+    name: 'ReviewPage',
+    component: () => import('@/views/client/ReviewPage.vue'),
+    meta: { title: '验收确认' }
+  },
 
   // 管理端页面
   {
@@ -43,6 +50,13 @@ const routes = [
     name: 'OrderDetail',
     component: () => import('@/views/admin/OrderDetail.vue'),
     meta: { title: '订单详情', requiresAuth: true }
+  },
+  // 创建验收页面 (毛娘端 PRD R-01)
+  {
+    path: '/admin/orders/:id/review',
+    name: 'CreateReview',
+    component: () => import('@/views/admin/CreateReview.vue'),
+    meta: { title: '创建验收', requiresAuth: true }
   },
 
   // 默认重定向

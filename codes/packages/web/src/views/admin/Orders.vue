@@ -2,7 +2,19 @@
   <div class="orders-page">
     <van-nav-bar title="订单管理" />
 
-    <!-- 状态统计 -->
+    <!-- 死线预警提示 PRD B-02 -->
+    <van-notice-bar
+      v-if="deadlineAlerts.length > 0"
+      mode="link"
+      :left-icon="deadlineAlerts.some(a => a.level === 'red') ? 'warning-o' : 'clock-o'"
+      :color="deadlineAlerts.some(a => a.level === 'red') ? '#ee0a24' : '#ff976a'"
+      :background="deadlineAlerts.some(a => a.level === 'red') ? '#fff1f0' : '#fffbe8'"
+      @click="showDeadlineAlert"
+    >
+      {{ deadlineAlerts.length }}个订单即将到期
+    </van-notice-bar>
+
+    <!-- 状态统计 PRD B-01 9状态 -->
     <div class="status-bar">
       <div
         v-for="item in statusList"
@@ -40,7 +52,7 @@
           :order="order"
           :show-actions="true"
           @click="goToDetail"
-          @action="handleStatusChange"
+          @action="handleAction"
         />
       </van-list>
     </van-pull-refresh>
@@ -66,8 +78,9 @@
             </div>
             <div class="inquiry-content">
               <p><strong>角色:</strong> {{ inquiry.character_name }} - {{ inquiry.source_work }}</p>
+              <p><strong>毛坯:</strong> {{ inquiry.wig_source === 'client_sends' ? '客户寄' : '毛娘代购' }}</p>
               <p><strong>预算:</strong> {{ inquiry.budget_range || '未填写' }}</p>
-              <p v-if="inquiry.requirements"><strong>要求:</strong> {{ inquiry.requirements }}</p>
+              <p v-if="inquiry.special_requirements"><strong>特殊要求:</strong> {{ inquiry.special_requirements }}</p>
             </div>
             <div class="inquiry-actions">
               <van-button size="small" @click="rejectInquiry(inquiry)">拒绝</van-button>
@@ -90,7 +103,8 @@
       <van-form>
         <van-cell-group>
           <van-field v-model="convertForm.price" label="价格" type="number" placeholder="成交价格" />
-          <van-field v-model="convertForm.deposit" label="定金" type="number" placeholder="定金金额" />
+          <van-cell title="定金" :value="computedDeposit ? `¥${computedDeposit}` : '自动计算(20%)'" />
+          <van-cell title="尾款" :value="computedBalance ? `¥${computedBalance}` : '自动计算(80%)'" />
           <van-field
             v-model="convertForm.deadline"
             label="交付日期"
@@ -112,31 +126,101 @@
       />
     </van-popup>
 
+    <!-- 确认定金弹窗 -->
+    <van-dialog
+      v-model:show="showDepositDialog"
+      title="确认定金到账"
+      show-cancel-button
+      @confirm="confirmDeposit"
+    >
+      <div class="deposit-dialog">
+        <p>确认客户已支付定金？</p>
+        <van-field name="screenshot" label="支付截图">
+          <template #input>
+            <van-uploader
+              v-model="depositScreenshot"
+              :max-count="1"
+              :after-read="handleDepositUpload"
+            />
+          </template>
+        </van-field>
+      </div>
+    </van-dialog>
+
+    <!-- 确认毛坯收货弹窗 -->
+    <van-dialog
+      v-model:show="showWigDialog"
+      title="确认毛坯收货"
+      show-cancel-button
+      @confirm="confirmWigReceived"
+    >
+      <div class="wig-dialog">
+        <van-field
+          v-model="wigTrackingNo"
+          label="快递单号"
+          placeholder="可选填写快递单号"
+        />
+      </div>
+    </van-dialog>
+
+    <!-- 发货弹窗 -->
+    <van-dialog
+      v-model:show="showShipDialog"
+      title="发货"
+      show-cancel-button
+      @confirm="handleShip"
+    >
+      <div class="ship-dialog">
+        <van-field
+          v-model="shipForm.shipping_company"
+          label="快递公司"
+          placeholder="如: 顺丰"
+        />
+        <van-field
+          v-model="shipForm.shipping_no"
+          label="快递单号"
+          placeholder="快递单号"
+        />
+        <div class="checklist">
+          <p class="checklist-title">发货检查:</p>
+          <van-checkbox v-model="shipForm.balance_confirmed">已确认尾款到账</van-checkbox>
+          <van-checkbox v-model="shipForm.cushioned">已使用防震包装</van-checkbox>
+          <van-checkbox v-model="shipForm.insured">已保价</van-checkbox>
+        </div>
+      </div>
+    </van-dialog>
+
     <AdminTabbar />
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, watch, onMounted } from 'vue'
+import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { showToast, showSuccessToast, showConfirmDialog } from 'vant'
+import { showToast, showSuccessToast, showFailToast, showConfirmDialog, showDialog } from 'vant'
 import { ordersApi, inquiriesApi } from '@/api'
 import OrderCard from '@/components/OrderCard.vue'
 import AdminTabbar from '@/components/AdminTabbar.vue'
 
 const router = useRouter()
 
+// PRD 2.0 状态列表 (9状态)
 const statusList = [
   { value: '', label: '全部' },
   { value: 'pending_deposit', label: '待定金' },
-  { value: 'in_production', label: '制作中' },
-  { value: 'pending_ship', label: '待发货' },
+  { value: 'awaiting_wig_base', label: '等毛坯' },
+  { value: 'queued', label: '排单中' },
+  { value: 'in_progress', label: '制作中' },
+  { value: 'in_review', label: '验收中' },
+  { value: 'pending_balance', label: '待尾款' },
+  { value: 'shipped', label: '已发货' },
   { value: 'completed', label: '已完成' }
 ]
 
 const currentStatus = ref('')
 const orders = ref([])
 const statusCount = ref({})
+const deadlineAlerts = ref([])
 const loading = ref(false)
 const refreshing = ref(false)
 const finished = ref(false)
@@ -150,12 +234,44 @@ const showConvertDialog = ref(false)
 const convertingInquiry = ref(null)
 const convertForm = reactive({
   price: '',
-  deposit: '',
   deadline: ''
 })
 
 const showDatePicker = ref(false)
 const selectedDate = ref([])
+
+// 确认定金相关
+const showDepositDialog = ref(false)
+const currentOrderForDeposit = ref(null)
+const depositScreenshot = ref([])
+const depositScreenshotUrl = ref('')
+
+// 确认毛坯相关
+const showWigDialog = ref(false)
+const currentOrderForWig = ref(null)
+const wigTrackingNo = ref('')
+
+// 发货相关
+const showShipDialog = ref(false)
+const currentOrderForShip = ref(null)
+const shipForm = reactive({
+  shipping_company: '',
+  shipping_no: '',
+  balance_confirmed: false,
+  cushioned: false,
+  insured: false
+})
+
+// 自动计算定金和尾款
+const computedDeposit = computed(() => {
+  if (!convertForm.price) return ''
+  return Math.round(parseFloat(convertForm.price) * 0.2 * 100) / 100
+})
+
+const computedBalance = computed(() => {
+  if (!convertForm.price) return ''
+  return Math.round(parseFloat(convertForm.price) * 0.8 * 100) / 100
+})
 
 // 监听状态变化，重新加载
 watch(currentStatus, () => {
@@ -177,11 +293,12 @@ const loadMore = async () => {
     })
 
     if (res.code === 0) {
-      const { list, pagination, statusCount: counts } = res.data
+      const { list, pagination, statusCount: counts, deadlineAlerts: alerts } = res.data
 
       if (page.value === 1) {
         orders.value = list
         statusCount.value = counts
+        deadlineAlerts.value = alerts || []
       } else {
         orders.value.push(...list)
       }
@@ -220,20 +337,138 @@ const goToDetail = (order) => {
   router.push(`/admin/orders/${order.id}`)
 }
 
-const handleStatusChange = async ({ order, status }) => {
+// 处理订单操作
+const handleAction = async ({ order, action }) => {
+  switch (action) {
+    case 'confirm_deposit':
+      currentOrderForDeposit.value = order
+      depositScreenshot.value = []
+      depositScreenshotUrl.value = ''
+      showDepositDialog.value = true
+      break
+    case 'confirm_wig':
+      currentOrderForWig.value = order
+      wigTrackingNo.value = ''
+      showWigDialog.value = true
+      break
+    case 'start':
+      await updateOrderStatus(order.id, 'in_progress')
+      break
+    case 'create_review':
+      router.push(`/admin/orders/${order.id}/review`)
+      break
+    case 'view_review':
+      router.push(`/admin/orders/${order.id}/review`)
+      break
+    case 'confirm_balance':
+      await confirmBalance(order)
+      break
+    case 'ship':
+      currentOrderForShip.value = order
+      shipForm.shipping_company = ''
+      shipForm.shipping_no = ''
+      shipForm.balance_confirmed = false
+      shipForm.cushioned = false
+      shipForm.insured = false
+      showShipDialog.value = true
+      break
+    case 'complete':
+      await completeOrder(order)
+      break
+    default:
+      showToast('未知操作')
+  }
+}
+
+const updateOrderStatus = async (id, status) => {
   try {
-    await ordersApi.updateStatus(order.id, status)
+    await ordersApi.updateStatus(id, status)
     showSuccessToast('状态已更新')
     onRefresh()
   } catch (error) {
-    showToast(error.message || '更新失败')
+    showFailToast(error.message || '更新失败')
+  }
+}
+
+const handleDepositUpload = (file) => {
+  file.status = 'done'
+  depositScreenshotUrl.value = file.content
+}
+
+const confirmDeposit = async () => {
+  try {
+    await ordersApi.confirmDeposit(currentOrderForDeposit.value.id, depositScreenshotUrl.value)
+    showSuccessToast('定金已确认')
+    onRefresh()
+  } catch (error) {
+    showFailToast(error.message || '操作失败')
+  }
+}
+
+const confirmWigReceived = async () => {
+  try {
+    await ordersApi.confirmWigReceived(currentOrderForWig.value.id, wigTrackingNo.value)
+    showSuccessToast('毛坯已确认收货')
+    onRefresh()
+  } catch (error) {
+    showFailToast(error.message || '操作失败')
+  }
+}
+
+const confirmBalance = async (order) => {
+  try {
+    await showConfirmDialog({
+      title: '确认尾款',
+      message: '确认客户已支付尾款？'
+    })
+    await ordersApi.confirmBalance(order.id)
+    showSuccessToast('尾款已确认')
+    onRefresh()
+  } catch {
+    // 取消
+  }
+}
+
+const handleShip = async () => {
+  if (!shipForm.balance_confirmed) {
+    showToast('请先确认尾款到账')
+    return
+  }
+
+  try {
+    await ordersApi.ship(currentOrderForShip.value.id, {
+      shipping_company: shipForm.shipping_company,
+      shipping_no: shipForm.shipping_no,
+      checklist: {
+        balance_confirmed: shipForm.balance_confirmed,
+        cushioned: shipForm.cushioned,
+        insured: shipForm.insured
+      }
+    })
+    showSuccessToast('已发货')
+    onRefresh()
+  } catch (error) {
+    showFailToast(error.message || '操作失败')
+  }
+}
+
+const completeOrder = async (order) => {
+  try {
+    await showConfirmDialog({
+      title: '确认完成',
+      message: '确认客户已收货，订单完成？'
+    })
+    await ordersApi.complete(order.id)
+    showSuccessToast('订单已完成')
+    onRefresh()
+  } catch {
+    // 取消
   }
 }
 
 const convertInquiry = (inquiry) => {
   convertingInquiry.value = inquiry
   convertForm.price = ''
-  convertForm.deposit = ''
   convertForm.deadline = inquiry.expected_deadline || ''
   showConvertDialog.value = true
 }
@@ -260,10 +495,14 @@ const onDateConfirm = ({ selectedValues }) => {
 const handleConvertClose = async (action) => {
   if (action !== 'confirm') return true
 
+  if (!convertForm.price) {
+    showToast('请输入价格')
+    return false
+  }
+
   try {
     await inquiriesApi.convert(convertingInquiry.value.id, {
-      price: convertForm.price ? parseFloat(convertForm.price) : undefined,
-      deposit: convertForm.deposit ? parseFloat(convertForm.deposit) : undefined,
+      price: parseFloat(convertForm.price),
       deadline: convertForm.deadline || undefined
     })
     showSuccessToast('订单创建成功')
@@ -272,9 +511,20 @@ const handleConvertClose = async (action) => {
     onRefresh()
     return true
   } catch (error) {
-    showToast(error.message || '转换失败')
+    showFailToast(error.message || '转换失败')
     return false
   }
+}
+
+const showDeadlineAlert = () => {
+  const alertList = deadlineAlerts.value
+    .map(a => `${a.character_name}: ${a.daysLeft <= 0 ? '已到期' : `${a.daysLeft}天后到期`}`)
+    .join('\n')
+
+  showDialog({
+    title: '死线预警',
+    message: alertList
+  })
 }
 
 const formatTime = (dateStr) => {
@@ -297,26 +547,28 @@ onMounted(() => {
 
 .status-bar {
   display: flex;
+  flex-wrap: wrap;
   background: #fff;
-  padding: 12px 0;
+  padding: 12px 8px;
   margin-bottom: 8px;
 }
 
 .status-item {
-  flex: 1;
+  width: 25%;
   text-align: center;
   cursor: pointer;
+  padding: 4px 0;
 }
 
 .status-item .count {
   display: block;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 600;
   color: #333;
 }
 
 .status-item .label {
-  font-size: 12px;
+  font-size: 11px;
   color: #999;
 }
 
@@ -377,5 +629,25 @@ onMounted(() => {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
+}
+
+.deposit-dialog,
+.wig-dialog,
+.ship-dialog {
+  padding: 16px;
+}
+
+.checklist {
+  margin-top: 12px;
+}
+
+.checklist-title {
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.checklist .van-checkbox {
+  margin-bottom: 8px;
 }
 </style>

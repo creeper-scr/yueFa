@@ -20,6 +20,8 @@ beforeAll(async () => {
 // 每个测试前清空数据
 beforeEach(() => {
   const db = getDb()
+  db.run('DELETE FROM review_revisions')
+  db.run('DELETE FROM reviews')
   db.run('DELETE FROM sms_codes')
   db.run('DELETE FROM orders')
   db.run('DELETE FROM inquiries')

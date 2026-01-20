@@ -8,6 +8,7 @@ import worksRoutes from './routes/works.js'
 import inquiriesRoutes from './routes/inquiries.js'
 import ordersRoutes from './routes/orders.js'
 import uploadRoutes from './routes/upload.js'
+import reviewsRoutes from './routes/reviews.js'
 import { errorHandler } from './middleware/errorHandler.js'
 
 const app = express()
@@ -30,6 +31,7 @@ app.use('/api/v1/works', worksRoutes)
 app.use('/api/v1/inquiries', inquiriesRoutes)
 app.use('/api/v1/orders', ordersRoutes)
 app.use('/api/v1/upload', uploadRoutes)
+app.use('/api/v1/reviews', reviewsRoutes)
 
 // 错误处理
 app.use(errorHandler)

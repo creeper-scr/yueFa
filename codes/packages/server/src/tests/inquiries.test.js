@@ -48,6 +48,50 @@ describe('Inquiries API', () => {
       expect(res.body.data.id).toBeDefined()
     })
 
+    it('应该成功提交包含毛坯来源的询价 (PRD F-03)', async () => {
+      const res = await request(app)
+        .post('/api/v1/inquiries')
+        .send({
+          user_slug: 'test_maoyang',
+          customer_name: '测试客户',
+          customer_contact: 'wx: test123',
+          character_name: '胡桃',
+          source_work: '原神',
+          wig_source: 'client_sends',
+          head_circumference: '56cm',
+          head_notes: '头型偏扁，后脑勺平'
+        })
+
+      expect(res.status).toBe(200)
+      expect(res.body.code).toBe(0)
+    })
+
+    it('应该成功提交毛娘代购的询价', async () => {
+      const res = await request(app)
+        .post('/api/v1/inquiries')
+        .send({
+          user_slug: 'test_maoyang',
+          customer_name: '测试客户',
+          character_name: '甘雨',
+          wig_source: 'stylist_buys'
+        })
+
+      expect(res.status).toBe(200)
+      expect(res.body.code).toBe(0)
+    })
+
+    it('应该拒绝无效的毛坯来源', async () => {
+      const res = await request(app)
+        .post('/api/v1/inquiries')
+        .send({
+          user_slug: 'test_maoyang',
+          character_name: '胡桃',
+          wig_source: 'invalid_source'
+        })
+
+      expect(res.body.code).toBe(1001)
+    })
+
     it('应该拒绝缺少必填字段', async () => {
       const res = await request(app)
         .post('/api/v1/inquiries')
@@ -129,7 +173,10 @@ describe('Inquiries API', () => {
         .send({
           user_slug: 'test_maoyang',
           customer_name: '测试客户',
-          character_name: '胡桃'
+          character_name: '胡桃',
+          wig_source: 'client_sends',
+          head_circumference: '56cm',
+          head_notes: '头型偏扁'
         })
       inquiryId = createRes.body.data.id
     })
@@ -142,6 +189,16 @@ describe('Inquiries API', () => {
       expect(res.status).toBe(200)
       expect(res.body.code).toBe(0)
       expect(res.body.data.character_name).toBe('胡桃')
+    })
+
+    it('应该返回毛坯来源和头围信息 (PRD F-01/F-03)', async () => {
+      const res = await request(app)
+        .get(`/api/v1/inquiries/${inquiryId}`)
+        .set('Authorization', `Bearer ${token}`)
+
+      expect(res.body.data.wig_source).toBe('client_sends')
+      expect(res.body.data.head_circumference).toBe('56cm')
+      expect(res.body.data.head_notes).toBe('头型偏扁')
     })
 
     it('应该返回404对于不存在的询价', async () => {
@@ -168,6 +225,48 @@ describe('Inquiries API', () => {
     })
   })
 
+  describe('POST /api/v1/inquiries/:id/quote (PRD F-02 报价)', () => {
+    beforeEach(async () => {
+      const createRes = await request(app)
+        .post('/api/v1/inquiries')
+        .send({
+          user_slug: 'test_maoyang',
+          customer_name: '测试客户',
+          character_name: '胡桃'
+        })
+      inquiryId = createRes.body.data.id
+    })
+
+    it('应该成功提交报价并自动计算定金/尾款', async () => {
+      const res = await request(app)
+        .post(`/api/v1/inquiries/${inquiryId}/quote`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ price: 500, deadline: '2026-03-15' })
+
+      expect(res.status).toBe(200)
+      expect(res.body.code).toBe(0)
+      expect(res.body.data.price).toBe(500)
+      expect(res.body.data.deposit).toBe(100)  // 20%
+      expect(res.body.data.balance).toBe(400)  // 80%
+    })
+
+    it('应该拒绝已处理的询价报价', async () => {
+      // 先报价
+      await request(app)
+        .post(`/api/v1/inquiries/${inquiryId}/quote`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ price: 500 })
+
+      // 再次报价
+      const res = await request(app)
+        .post(`/api/v1/inquiries/${inquiryId}/quote`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ price: 600 })
+
+      expect(res.body.code).toBe(1001)
+    })
+  })
+
   describe('POST /api/v1/inquiries/:id/convert', () => {
     beforeEach(async () => {
       const createRes = await request(app)
@@ -177,7 +276,10 @@ describe('Inquiries API', () => {
           customer_name: '测试客户',
           customer_contact: 'wx: test',
           character_name: '胡桃',
-          source_work: '原神'
+          source_work: '原神',
+          wig_source: 'client_sends',
+          head_circumference: '56cm',
+          head_notes: '头型偏扁'
         })
       inquiryId = createRes.body.data.id
     })
@@ -188,7 +290,6 @@ describe('Inquiries API', () => {
         .set('Authorization', `Bearer ${token}`)
         .send({
           price: 500,
-          deposit: 200,
           deadline: '2026-03-15'
         })
 
@@ -200,7 +301,28 @@ describe('Inquiries API', () => {
       expect(res.body.data.price).toBe(500)
     })
 
-    it('应该拒绝已处理的询价', async () => {
+    it('转换订单时应该继承毛坯来源和头围信息', async () => {
+      const res = await request(app)
+        .post(`/api/v1/inquiries/${inquiryId}/convert`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ price: 500 })
+
+      expect(res.body.data.wig_source).toBe('client_sends')
+      expect(res.body.data.head_circumference).toBe('56cm')
+      expect(res.body.data.head_notes).toBe('头型偏扁')
+    })
+
+    it('转换订单时应该自动计算定金和尾款 (PRD F-02)', async () => {
+      const res = await request(app)
+        .post(`/api/v1/inquiries/${inquiryId}/convert`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ price: 500 })
+
+      expect(res.body.data.deposit).toBe(100)  // 500 * 20%
+      expect(res.body.data.balance).toBe(400)  // 500 * 80%
+    })
+
+    it('应该拒绝已转换的询价', async () => {
       // 先转换一次
       await request(app)
         .post(`/api/v1/inquiries/${inquiryId}/convert`)
@@ -214,7 +336,7 @@ describe('Inquiries API', () => {
         .send({ price: 600 })
 
       expect(res.body.code).toBe(1001)
-      expect(res.body.message).toBe('该询价已处理')
+      expect(res.body.message).toBe('该询价已转为订单')
     })
 
     it('应该拒绝无权限操作他人询价', async () => {

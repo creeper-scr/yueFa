@@ -22,8 +22,13 @@ describe('InquiryForm', () => {
     expect(wrapper.find('[name="expected_deadline"]').exists()).toBe(true)
     expect(wrapper.find('[name="head_circumference"]').exists()).toBe(true)
     expect(wrapper.find('[name="budget_range"]').exists()).toBe(true)
-    expect(wrapper.find('[name="requirements"]').exists()).toBe(true)
-    expect(wrapper.find('[name="reference_images"]').exists()).toBe(true)
+
+    // PRD F-01 新增字段
+    expect(wrapper.find('[name="head_notes"]').exists()).toBe(true)
+    expect(wrapper.find('[name="special_requirements"]').exists()).toBe(true)
+
+    // PRD F-03 毛坯来源
+    expect(wrapper.find('[name="wig_source"]').exists()).toBe(true)
   })
 
   it('应该显示提交按钮', () => {
@@ -185,7 +190,11 @@ describe('InquiryForm', () => {
     expect(wrapper.vm.form.expected_deadline).toBe('')
     expect(wrapper.vm.form.head_circumference).toBe('')
     expect(wrapper.vm.form.budget_range).toBe('')
-    expect(wrapper.vm.form.requirements).toBe('')
+    // PRD F-01 新字段
+    expect(wrapper.vm.form.head_notes).toBe('')
+    expect(wrapper.vm.form.special_requirements).toBe('')
+    // PRD F-03 毛坯来源默认值
+    expect(wrapper.vm.form.wig_source).toBe('client_sends')
     expect(wrapper.vm.form.reference_images).toEqual([])
   })
 
@@ -195,5 +204,53 @@ describe('InquiryForm', () => {
     })
 
     expect(wrapper.vm.fileList).toEqual([])
+  })
+
+  // PRD F-03 毛坯来源测试
+  it('应该包含毛坯来源选择器', () => {
+    const wrapper = mount(InquiryForm, {
+      props: defaultProps
+    })
+
+    // 检查毛坯来源字段存在
+    expect(wrapper.find('[name="wig_source"]').exists()).toBe(true)
+  })
+
+  it('毛坯来源默认为客户寄', () => {
+    const wrapper = mount(InquiryForm, {
+      props: defaultProps
+    })
+
+    expect(wrapper.vm.form.wig_source).toBe('client_sends')
+  })
+
+  // PRD F-01 头围测量指南测试
+  it('头围测量指南默认隐藏', () => {
+    const wrapper = mount(InquiryForm, {
+      props: defaultProps
+    })
+
+    expect(wrapper.vm.showHeadMeasureGuide).toBe(false)
+  })
+
+  it('提交数据应包含PRD 2.0新字段', async () => {
+    const wrapper = mount(InquiryForm, {
+      props: defaultProps
+    })
+
+    // 填写表单
+    wrapper.vm.form.customer_name = '测试用户'
+    wrapper.vm.form.customer_contact = 'wx: test123'
+    wrapper.vm.form.character_name = '初音未来'
+    wrapper.vm.form.head_notes = '头型偏扁'
+    wrapper.vm.form.wig_source = 'stylist_buys'
+    wrapper.vm.form.special_requirements = '需要发际线自然过渡'
+
+    await wrapper.find('.van-form').trigger('submit')
+
+    const emittedData = wrapper.emitted('submit')[0][0]
+    expect(emittedData.head_notes).toBe('头型偏扁')
+    expect(emittedData.wig_source).toBe('stylist_buys')
+    expect(emittedData.special_requirements).toBe('需要发际线自然过渡')
   })
 })
