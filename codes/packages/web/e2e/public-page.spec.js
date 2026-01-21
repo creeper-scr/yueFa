@@ -108,11 +108,11 @@ test.describe('公开主页 - 询价表单', () => {
     await page.goto('/s/test-shop')
     await page.getByRole('tab', { name: '询价' }).click()
 
-    // 检查表单字段 (使用实际的label名称)
-    await expect(page.getByLabel('称呼')).toBeVisible()
-    await expect(page.getByLabel('联系方式')).toBeVisible()
-    await expect(page.getByLabel('角色名')).toBeVisible()
-    await expect(page.getByLabel('作品出处')).toBeVisible()
+    // 检查表单字段 (使用 placeholder 定位，因为 Vant 的 label 是通过 aria-labelledby 关联的)
+    await expect(page.getByPlaceholder('您的称呼')).toBeVisible()
+    await expect(page.getByPlaceholder('微信号/QQ/手机号')).toBeVisible()
+    await expect(page.getByPlaceholder('想要的角色名称')).toBeVisible()
+    await expect(page.getByPlaceholder('角色所属的作品/游戏')).toBeVisible()
   })
 
   test('应该验证必填字段', async ({ page }) => {
@@ -130,11 +130,11 @@ test.describe('公开主页 - 询价表单', () => {
     await page.goto('/s/test-shop')
     await page.getByRole('tab', { name: '询价' }).click()
 
-    // 填写表单
-    await page.getByLabel('称呼').fill('测试用户')
-    await page.getByLabel('联系方式').fill('微信: miku123')
-    await page.getByLabel('角色名').fill('初音未来')
-    await page.getByLabel('作品出处').fill('VOCALOID')
+    // 填写表单 (使用 placeholder 定位)
+    await page.getByPlaceholder('您的称呼').fill('测试用户')
+    await page.getByPlaceholder('微信号/QQ/手机号').fill('微信: miku123')
+    await page.getByPlaceholder('想要的角色名称').fill('初音未来')
+    await page.getByPlaceholder('角色所属的作品/游戏').fill('VOCALOID')
 
     // 提交
     await page.getByRole('button', { name: '提交询价' }).click()
@@ -147,10 +147,10 @@ test.describe('公开主页 - 询价表单', () => {
     await page.goto('/s/test-shop')
     await page.getByRole('tab', { name: '询价' }).click()
 
-    // 填写并提交
-    await page.getByLabel('称呼').fill('测试用户')
-    await page.getByLabel('联系方式').fill('微信: miku123')
-    await page.getByLabel('角色名').fill('初音未来')
+    // 填写并提交 (使用 placeholder 定位)
+    await page.getByPlaceholder('您的称呼').fill('测试用户')
+    await page.getByPlaceholder('微信号/QQ/手机号').fill('微信: miku123')
+    await page.getByPlaceholder('想要的角色名称').fill('初音未来')
     await page.getByRole('button', { name: '提交询价' }).click()
 
     // 等待提示消失

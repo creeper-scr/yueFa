@@ -20,8 +20,8 @@ test.describe('验收流程 (PRD R-01)', () => {
     await expect(page.locator('.character-name')).toHaveText('雷姆')
     await expect(page.locator('.source-work')).toHaveText('Re:Zero')
 
-    // 检查成品展示区域
-    await expect(page.locator('.section-title')).toContainText('成品展示')
+    // 检查成品展示区域 (使用精确选择器)
+    await expect(page.getByRole('heading', { name: '成品展示' })).toBeVisible()
     await expect(page.locator('.images-grid .van-image')).toHaveCount(3)
   })
 
@@ -87,7 +87,8 @@ test.describe('验收操作 (PRD R-01)', () => {
 
     // 检查弹窗出现
     await expect(page.locator('.van-dialog')).toBeVisible()
-    await expect(page.getByText('申请修改')).toBeVisible()
+    // 使用精确匹配弹窗标题，避免与按钮文字冲突
+    await expect(page.locator('.van-dialog__header')).toContainText('申请修改')
   })
 
   test('提交修改意见应该成功', async ({ page }) => {
@@ -117,7 +118,8 @@ test.describe('修改记录显示 (PRD R-02)', () => {
 
     // 检查修改记录区域
     await expect(page.locator('.revisions-section')).toBeVisible()
-    await expect(page.locator('.section-title')).toContainText('修改记录')
+    // 使用精确选择器定位修改记录标题
+    await expect(page.getByRole('heading', { name: '修改记录' })).toBeVisible()
 
     // 检查修改内容
     await expect(page.locator('.revision-item')).toBeVisible()

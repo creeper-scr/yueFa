@@ -13,9 +13,9 @@ test.describe('登录页面', () => {
     await expect(page.locator('.title')).toHaveText('约发')
     await expect(page.locator('.subtitle')).toHaveText('Cosplay假发造型师专属工具')
 
-    // 检查表单元素
-    await expect(page.getByLabel('手机号')).toBeVisible()
-    await expect(page.getByLabel('验证码')).toBeVisible()
+    // 检查表单元素 (使用 placeholder 定位，因为 Vant 的 label 是通过 aria-labelledby 关联的)
+    await expect(page.getByPlaceholder('请输入手机号')).toBeVisible()
+    await expect(page.getByPlaceholder('请输入验证码')).toBeVisible()
     await expect(page.getByRole('button', { name: '获取验证码' })).toBeVisible()
     await expect(page.getByRole('button', { name: '登录' })).toBeVisible()
 
@@ -26,8 +26,8 @@ test.describe('登录页面', () => {
   test('应该验证手机号格式', async ({ page }) => {
     await page.goto('/login')
 
-    // 输入无效手机号
-    await page.getByLabel('手机号').fill('12345')
+    // 输入无效手机号 (使用 placeholder 定位)
+    await page.getByPlaceholder('请输入手机号').fill('12345')
     await page.getByRole('button', { name: '获取验证码' }).click()
 
     // 检查错误提示 (Vant表单验证显示的消息)
@@ -37,8 +37,8 @@ test.describe('登录页面', () => {
   test('应该成功发送验证码', async ({ page }) => {
     await page.goto('/login')
 
-    // 输入有效手机号
-    await page.getByLabel('手机号').fill('13800138000')
+    // 输入有效手机号 (使用 placeholder 定位)
+    await page.getByPlaceholder('请输入手机号').fill('13800138000')
     await page.getByRole('button', { name: '获取验证码' }).click()
 
     // 检查成功提示
@@ -51,14 +51,14 @@ test.describe('登录页面', () => {
   test('应该成功登录并跳转', async ({ page }) => {
     await page.goto('/login')
 
-    // 输入手机号
-    await page.getByLabel('手机号').fill('13800138000')
+    // 输入手机号 (使用 placeholder 定位)
+    await page.getByPlaceholder('请输入手机号').fill('13800138000')
 
     // 发送验证码（Mock会自动填充验证码到输入框）
     await page.getByRole('button', { name: '获取验证码' }).click()
 
     // 等待验证码自动填充 (检查输入框有值)
-    await expect(page.getByLabel('验证码')).toHaveValue('123456', { timeout: 3000 })
+    await expect(page.getByPlaceholder('请输入验证码')).toHaveValue('123456', { timeout: 3000 })
 
     // 点击登录
     await page.getByRole('button', { name: '登录' }).click()
@@ -70,9 +70,9 @@ test.describe('登录页面', () => {
   test('应该提示验证码错误', async ({ page }) => {
     await page.goto('/login')
 
-    // 输入手机号和错误验证码
-    await page.getByLabel('手机号').fill('13800138000')
-    await page.getByLabel('验证码').fill('999999')
+    // 输入手机号和错误验证码 (使用 placeholder 定位)
+    await page.getByPlaceholder('请输入手机号').fill('13800138000')
+    await page.getByPlaceholder('请输入验证码').fill('999999')
 
     // 点击登录
     await page.getByRole('button', { name: '登录' }).click()
@@ -93,10 +93,10 @@ test.describe('登录页面', () => {
   test('登录后应该能访问需要认证的页面', async ({ page }) => {
     await page.goto('/login')
 
-    // 执行登录流程
-    await page.getByLabel('手机号').fill('13800138000')
+    // 执行登录流程 (使用 placeholder 定位)
+    await page.getByPlaceholder('请输入手机号').fill('13800138000')
     await page.getByRole('button', { name: '获取验证码' }).click()
-    await expect(page.getByLabel('验证码')).toHaveValue('123456', { timeout: 3000 })
+    await expect(page.getByPlaceholder('请输入验证码')).toHaveValue('123456', { timeout: 3000 })
     await page.getByRole('button', { name: '登录' }).click()
 
     // 等待跳转

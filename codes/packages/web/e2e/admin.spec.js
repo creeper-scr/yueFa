@@ -21,8 +21,8 @@ test.describe('订单管理页面', () => {
   test('应该显示订单卡片', async ({ page }) => {
     await page.goto('/admin/orders')
 
-    // 等待订单加载
-    await expect(page.locator('.order-card')).toHaveCount(2)
+    // 等待订单加载 (Mock数据有3个订单)
+    await expect(page.locator('.order-card')).toHaveCount(3)
   })
 
   test('应该能切换订单状态筛选', async ({ page }) => {
@@ -91,11 +91,11 @@ test.describe('个人资料编辑页面', () => {
   test('应该正确显示个人资料表单', async ({ page }) => {
     await page.goto('/admin/profile')
 
-    // 检查表单字段 (使用实际的label名称)
-    await expect(page.getByLabel('店铺名称')).toBeVisible()
-    await expect(page.getByLabel('链接后缀')).toBeVisible()
-    await expect(page.getByLabel('微信号')).toBeVisible()
-    await expect(page.getByLabel('公告')).toBeVisible()
+    // 检查表单字段 (使用 placeholder 定位，因为 Vant 的 label 是通过 aria-labelledby 关联的)
+    await expect(page.getByPlaceholder('店铺名称（如：XXX发艺工作室）')).toBeVisible()
+    await expect(page.getByPlaceholder('链接后缀（如: my-shop）')).toBeVisible()
+    await expect(page.getByPlaceholder('微信号/QQ（方便客户联系）')).toBeVisible()
+    await expect(page.getByPlaceholder('输入店铺公告...')).toBeVisible()
   })
 
   test('应该预填充用户数据', async ({ page }) => {
@@ -104,10 +104,10 @@ test.describe('个人资料编辑页面', () => {
     // 等待数据加载
     await page.waitForTimeout(500)
 
-    // 验证数据预填充
-    await expect(page.getByLabel('店铺名称')).toHaveValue('测试毛娘')
-    await expect(page.getByLabel('链接后缀')).toHaveValue('test-shop')
-    await expect(page.getByLabel('微信号')).toHaveValue('test_wechat')
+    // 验证数据预填充 (使用 placeholder 定位)
+    await expect(page.getByPlaceholder('店铺名称（如：XXX发艺工作室）')).toHaveValue('测试毛娘')
+    await expect(page.getByPlaceholder('链接后缀（如: my-shop）')).toHaveValue('test-shop')
+    await expect(page.getByPlaceholder('微信号/QQ（方便客户联系）')).toHaveValue('test_wechat')
   })
 
   test('应该能编辑并保存资料', async ({ page }) => {
@@ -116,9 +116,9 @@ test.describe('个人资料编辑页面', () => {
     // 等待数据加载
     await page.waitForTimeout(500)
 
-    // 修改店铺名称
-    await page.getByLabel('店铺名称').clear()
-    await page.getByLabel('店铺名称').fill('新店铺名称')
+    // 修改店铺名称 (使用 placeholder 定位)
+    await page.getByPlaceholder('店铺名称（如：XXX发艺工作室）').clear()
+    await page.getByPlaceholder('店铺名称（如：XXX发艺工作室）').fill('新店铺名称')
 
     // 保存
     await page.getByRole('button', { name: '保存' }).click()
