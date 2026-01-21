@@ -144,7 +144,8 @@ jobs:
             --region "$ALIYUN_REGION" \
             --access-key-id "$ALIYUN_ACCESS_KEY_ID" \
             --access-key-secret "$ALIYUN_ACCESS_KEY_SECRET"
-          aliyun oss sync dist/ oss://$OSS_BUCKET_PROD/ --delete --force
+          echo "Deploying to bucket: $OSS_BUCKET_PROD"
+          aliyun oss sync dist/ "oss://${OSS_BUCKET_PROD}/" --delete --force
         env:
           ALIYUN_REGION: ${{ secrets.ALIYUN_REGION }}
           ALIYUN_ACCESS_KEY_ID: ${{ secrets.ALIYUN_ACCESS_KEY_ID }}
