@@ -13,9 +13,9 @@ test.describe('订单管理页面', () => {
     // 检查页面标题
     await expect(page).toHaveTitle(/订单管理/)
 
-    // 检查状态栏 (使用自定义状态栏而非van-tabs)
+    // 检查状态栏 (PRD 2.0: 9种状态 - 待报价、待定金、等毛坯、排单中、制作中、验收中、待尾款、已发货、已完成)
     await expect(page.locator('.status-bar')).toBeVisible()
-    await expect(page.locator('.status-item')).toHaveCount(5) // 全部、待定金、制作中、待发货、已完成
+    await expect(page.locator('.status-item')).toHaveCount(9)
   })
 
   test('应该显示订单卡片', async ({ page }) => {
