@@ -2,7 +2,7 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
   pull_request:
     branches: [main]
 
@@ -11,7 +11,7 @@ env:
   NODE_VERSION: 18
 
 jobs:
-  # ==================== 测试阶段 ====================
+  # ==================== 单元测试 ====================
   test:
     name: Unit Tests
     runs-on: ubuntu-latest
@@ -20,32 +20,27 @@ jobs:
         working-directory: ./codes
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
+      - uses: pnpm/action-setup@v2
         with:
           version: ${{ env.PNPM_VERSION }}
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
           cache-dependency-path: codes/pnpm-lock.yaml
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile
 
-      - name: Run unit tests
-        run: pnpm test
+      - run: pnpm test
         env:
           NODE_ENV: test
           JWT_SECRET: test_jwt_secret
           DB_PATH: ./data/test.db
 
-  # ==================== E2E 测试阶段 ====================
+  # ==================== E2E 测试 ====================
   e2e:
     name: E2E Tests
     runs-on: ubuntu-latest
@@ -55,25 +50,21 @@ jobs:
         working-directory: ./codes
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
+      - uses: pnpm/action-setup@v2
         with:
           version: ${{ env.PNPM_VERSION }}
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
           cache-dependency-path: codes/pnpm-lock.yaml
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile
 
-      - name: Install Playwright browsers
+      - name: Install Playwright
         run: pnpm --filter @yuefa/web exec playwright install --with-deps chromium
 
       - name: Run E2E tests
@@ -84,86 +75,63 @@ jobs:
           JWT_SECRET: test_jwt_secret
           DB_PATH: ./data/test.db
 
-      - name: Upload Playwright report
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: playwright-report
           path: codes/packages/web/playwright-report/
-          retention-days: 30
+          retention-days: 7
 
-  # ==================== 构建阶段 ====================
+  # ==================== 构建 ====================
   build:
     name: Build
     runs-on: ubuntu-latest
     needs: [test, e2e]
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     defaults:
       run:
         working-directory: ./codes
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
+      - uses: pnpm/action-setup@v2
         with:
           version: ${{ env.PNPM_VERSION }}
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
           cache-dependency-path: codes/pnpm-lock.yaml
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile
 
       - name: Build frontend
         run: pnpm --filter @yuefa/web build
         env:
-          VITE_API_BASE_URL: ${{ github.ref == 'refs/heads/main' && secrets.PROD_API_URL || secrets.STAGING_API_URL }}
+          VITE_API_BASE_URL: ${{ secrets.PROD_API_URL }}
 
-      - name: Upload web build artifacts
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: web-dist
           path: codes/packages/web/dist/
-          retention-days: 7
+          retention-days: 3
 
-      - name: Prepare server package
-        run: |
-          mkdir -p server-package
-          cp -r packages/server/src server-package/
-          cp packages/server/package.json server-package/
-          cp packages/server/index.js server-package/ 2>/dev/null || true
-
-      - name: Upload server build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: server-dist
-          path: codes/server-package/
-          retention-days: 7
-
-  # ==================== 部署前端到 OSS ====================
+  # ==================== 部署前端 ====================
   deploy-frontend:
     name: Deploy Frontend to OSS
     runs-on: ubuntu-latest
     needs: build
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
-    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
+    environment: production
 
     steps:
-      - name: Download web artifacts
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
           name: web-dist
           path: dist/
 
-      - name: Setup aliyun-cli
-        uses: aliyun/setup-aliyun-cli-action@v1
+      - uses: aliyun/setup-aliyun-cli-action@v1
         with:
           aliyun-cli-version: latest
           aliyun-cli-access-key-id: ${{ secrets.ALIYUN_ACCESS_KEY_ID }}
@@ -171,62 +139,40 @@ jobs:
           aliyun-cli-region: ${{ secrets.ALIYUN_REGION }}
 
       - name: Deploy to OSS
-        run: |
-          OSS_BUCKET=${{ github.ref == 'refs/heads/main' && secrets.OSS_BUCKET_PROD || secrets.OSS_BUCKET_STAGING }}
-          aliyun oss sync dist/ oss://${OSS_BUCKET}/ --delete --force
-
-      - name: Refresh CDN cache
-        if: ${{ secrets.CDN_DOMAIN_PROD != '' || secrets.CDN_DOMAIN_STAGING != '' }}
-        run: |
-          CDN_DOMAIN=${{ github.ref == 'refs/heads/main' && secrets.CDN_DOMAIN_PROD || secrets.CDN_DOMAIN_STAGING }}
-          if [ -n "$CDN_DOMAIN" ]; then
-            aliyun cdn RefreshObjectCaches --ObjectPath "https://${CDN_DOMAIN}/" --ObjectType Directory
-          fi
+        run: aliyun oss sync dist/ oss://${{ secrets.OSS_BUCKET_PROD }}/ --delete --force
 
       - name: Verify deployment
         run: |
-          CDN_DOMAIN=${{ github.ref == 'refs/heads/main' && secrets.CDN_DOMAIN_PROD || secrets.CDN_DOMAIN_STAGING }}
-          OSS_BUCKET=${{ github.ref == 'refs/heads/main' && secrets.OSS_BUCKET_PROD || secrets.OSS_BUCKET_STAGING }}
-          sleep 10
-          if [ -n "$CDN_DOMAIN" ]; then
-            curl -f "https://${CDN_DOMAIN}/index.html" || exit 1
-          else
-            curl -f "https://${OSS_BUCKET}.oss-${{ secrets.ALIYUN_REGION }}.aliyuncs.com/index.html" || exit 1
-          fi
-          echo "Frontend deployment verified!"
+          sleep 5
+          curl -f "https://${{ secrets.OSS_BUCKET_PROD }}.oss-${{ secrets.ALIYUN_REGION }}.aliyuncs.com/index.html"
+          echo "✅ Frontend deployed!"
 
-  # ==================== 部署后端到函数计算 FC ====================
+  # ==================== 部署后端 ====================
   deploy-backend:
     name: Deploy Backend to FC
     runs-on: ubuntu-latest
     needs: build
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
-    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
+    environment: production
     defaults:
       run:
         working-directory: ./codes
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
+      - uses: pnpm/action-setup@v2
         with:
           version: ${{ env.PNPM_VERSION }}
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile
 
-      - name: Install Serverless Devs
-        run: npm install -g @serverless-devs/s
+      - run: npm install -g @serverless-devs/s
 
-      - name: Configure Serverless Devs credentials
+      - name: Configure credentials
         run: |
           s config add --AccountID ${{ secrets.ALIYUN_ACCOUNT_ID }} \
             --AccessKeyID ${{ secrets.ALIYUN_ACCESS_KEY_ID }} \
@@ -234,42 +180,38 @@ jobs:
             -a aliyun-fc
 
       - name: Deploy to FC
-        run: |
-          ENV=${{ github.ref == 'refs/heads/main' && 'prod' || 'staging' }}
-          s deploy -y --use-local
+        run: s deploy -y --use-local
         env:
-          ENV: ${{ github.ref == 'refs/heads/main' && 'prod' || 'staging' }}
-          NODE_ENV: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
-          DATABASE_URL: ${{ github.ref == 'refs/heads/main' && secrets.DATABASE_URL || secrets.DATABASE_URL_STAGING }}
+          NODE_ENV: production
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           OSS_ACCESS_KEY_ID: ${{ secrets.ALIYUN_ACCESS_KEY_ID }}
           OSS_ACCESS_KEY_SECRET: ${{ secrets.ALIYUN_ACCESS_KEY_SECRET }}
           OSS_BUCKET: ${{ secrets.OSS_BUCKET_DATA }}
           OSS_REGION: ${{ secrets.ALIYUN_REGION }}
 
-      - name: Verify backend deployment
+      - name: Verify deployment
         run: |
-          FC_ENDPOINT=${{ github.ref == 'refs/heads/main' && secrets.FC_ENDPOINT_PROD || secrets.FC_ENDPOINT_STAGING }}
-          sleep 15
-          curl -f "${FC_ENDPOINT}/api/health" || exit 1
-          echo "Backend deployment verified!"
+          sleep 10
+          curl -f "${{ secrets.FC_ENDPOINT_PROD }}/api/health"
+          echo "✅ Backend deployed!"
 
-  # ==================== 部署通知 ====================
+  # ==================== 通知 ====================
   notify:
-    name: Notify Deployment
+    name: Deployment Status
     runs-on: ubuntu-latest
     needs: [deploy-frontend, deploy-backend]
-    if: always() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    if: always()
 
     steps:
-      - name: Deployment Status
+      - name: Check status
         run: |
-          if [ "${{ needs.deploy-frontend.result }}" == "success" ] && [ "${{ needs.deploy-backend.result }}" == "success" ]; then
-            echo "✅ Deployment succeeded!"
-            echo "Environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Staging' }}"
+          if [ "${{ needs.deploy-frontend.result }}" == "success" ] && \
+             [ "${{ needs.deploy-backend.result }}" == "success" ]; then
+            echo "✅ Production deployment successful!"
+            echo "Frontend: https://${{ secrets.OSS_BUCKET_PROD }}.oss-${{ secrets.ALIYUN_REGION }}.aliyuncs.com"
+            echo "Backend: ${{ secrets.FC_ENDPOINT_PROD }}"
           else
             echo "❌ Deployment failed!"
-            echo "Frontend: ${{ needs.deploy-frontend.result }}"
-            echo "Backend: ${{ needs.deploy-backend.result }}"
             exit 1
           fi
