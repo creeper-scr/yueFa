@@ -1,7 +1,7 @@
 import 'dotenv/config'
 import express from 'express'
 import cors from 'cors'
-import { initDb } from './models/index.js'
+import { initDb, getDbType } from './models/index.js'
 import authRoutes from './routes/auth.js'
 import usersRoutes from './routes/users.js'
 import worksRoutes from './routes/works.js'
@@ -21,7 +21,12 @@ app.use(express.urlencoded({ extended: true }))
 
 // 健康检查
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() })
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    database: getDbType(),
+    environment: process.env.NODE_ENV || 'development'
+  })
 })
 
 // API路由

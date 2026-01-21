@@ -8,10 +8,17 @@
     "dev:web": "pnpm --filter @yuefa/web dev",
     "dev:server": "pnpm --filter @yuefa/server dev",
     "build": "pnpm -r build",
+    "build:web": "pnpm --filter @yuefa/web build",
     "test": "pnpm -r test",
     "test:web": "pnpm --filter @yuefa/web test",
     "test:server": "pnpm --filter @yuefa/server test",
-    "lint": "pnpm -r lint"
+    "test:e2e": "pnpm --filter @yuefa/web test:e2e",
+    "lint": "pnpm -r lint",
+    "docker:dev": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:build": "docker build -t yuefa-app .",
+    "deploy:staging": "s deploy -y --use-local",
+    "deploy:prod": "ENV=prod NODE_ENV=production s deploy -y --use-local"
   },
   "engines": {
     "node": ">=18.0.0"

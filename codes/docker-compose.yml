@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  # PostgreSQL 数据库
+  postgres:
+    image: postgres:15-alpine
+    container_name: yuefa-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: yuefa
+      POSTGRES_PASSWORD: yuefa_dev_password
+      POSTGRES_DB: yuefa
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./packages/server/src/db/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U yuefa -d yuefa"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 后端服务
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: yuefa-server
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      PORT: 4000
+      DATABASE_URL: postgres://yuefa:yuefa_dev_password@postgres:5432/yuefa
+      JWT_SECRET: yuefa_jwt_secret_dev_2024
+      JWT_EXPIRES_IN: 7d
+    ports:
+      - "4000:4000"
+    command: ["node", "packages/server/src/app.js"]
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # 前端开发服务
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    container_name: yuefa-web
+    restart: unless-stopped
+    depends_on:
+      - server
+    environment:
+      VITE_API_BASE_URL: http://localhost:4000
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./packages/web/src:/app/packages/web/src
+      - ./packages/web/public:/app/packages/web/public
+    command: ["pnpm", "--filter", "@yuefa/web", "dev", "--host"]
+
+volumes:
+  postgres_data:
+
+networks:
+  default:
+    name: yuefa-network
