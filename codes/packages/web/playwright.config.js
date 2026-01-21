@@ -50,11 +50,16 @@ export default defineConfig({
   // 启动开发服务器（前端和后端）
   webServer: [
     {
-      command: 'pnpm --filter @yuefa/server dev',
+      command: 'node src/app.js',
       url: 'http://localhost:4000/api/health',
       reuseExistingServer: !process.env.CI,
       timeout: 120 * 1000,
-      cwd: '../..',
+      cwd: '../server',
+      env: {
+        NODE_ENV: 'test',
+        JWT_SECRET: process.env.JWT_SECRET || 'test_jwt_secret',
+        PORT: '4000',
+      },
     },
     {
       command: 'pnpm dev',
