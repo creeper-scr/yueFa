@@ -5,7 +5,8 @@ import { SmsCodeModel } from '../models/SmsCode.js'
 import { ORDER_STATUS } from '../models/Order.js'
 
 describe('Reviews API (PRD R系列)', () => {
-  const testPhone = '13800138000'
+  const testPhone = '13800138002'  // 唯一手机号，避免与其他测试冲突
+  const testSlug = 'test_reviews_user'  // 唯一 slug
   let token
   let orderId
   let reviewId
@@ -17,7 +18,7 @@ describe('Reviews API (PRD R系列)', () => {
     const inquiryRes = await request(app)
       .post('/api/v1/inquiries')
       .send({
-        user_slug: 'test_maoyang',
+        user_slug: testSlug,
         customer_name: '测试客户',
         customer_contact: 'wx: test',
         character_name: '胡桃',
@@ -66,7 +67,7 @@ describe('Reviews API (PRD R系列)', () => {
     await request(app)
       .put('/api/v1/users/profile')
       .set('Authorization', `Bearer ${token}`)
-      .send({ slug: 'test_maoyang' })
+      .send({ slug: testSlug })
 
     // 准备订单到制作中状态
     orderId = await prepareOrderToInProgress()

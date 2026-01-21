@@ -4,7 +4,8 @@ import { app } from '../app.js'
 import { SmsCodeModel } from '../models/SmsCode.js'
 
 describe('Inquiries API', () => {
-  const testPhone = '13800138000'
+  const testPhone = '13800138003'  // 唯一手机号，避免与其他测试冲突
+  const testSlug = 'test_inquiries_user'  // 唯一 slug
   let token
   let userId
   let inquiryId
@@ -22,7 +23,7 @@ describe('Inquiries API', () => {
     await request(app)
       .put('/api/v1/users/profile')
       .set('Authorization', `Bearer ${token}`)
-      .send({ slug: 'test_maoyang' })
+      .send({ slug: testSlug })
   })
 
   describe('POST /api/v1/inquiries', () => {
@@ -30,7 +31,7 @@ describe('Inquiries API', () => {
       const res = await request(app)
         .post('/api/v1/inquiries')
         .send({
-          user_slug: 'test_maoyang',
+          user_slug: testSlug,
           customer_name: '测试客户',
           customer_contact: 'wx: test123',
           character_name: '胡桃',
@@ -52,7 +53,7 @@ describe('Inquiries API', () => {
       const res = await request(app)
         .post('/api/v1/inquiries')
         .send({
-          user_slug: 'test_maoyang',
+          user_slug: testSlug,
           customer_name: '测试客户',
           customer_contact: 'wx: test123',
           character_name: '胡桃',
@@ -70,7 +71,7 @@ describe('Inquiries API', () => {
       const res = await request(app)
         .post('/api/v1/inquiries')
         .send({
-          user_slug: 'test_maoyang',
+          user_slug: testSlug,
           customer_name: '测试客户',
           character_name: '甘雨',
           wig_source: 'stylist_buys'
@@ -84,7 +85,7 @@ describe('Inquiries API', () => {
       const res = await request(app)
         .post('/api/v1/inquiries')
         .send({
-          user_slug: 'test_maoyang',
+          user_slug: testSlug,
           character_name: '胡桃',
           wig_source: 'invalid_source'
         })
@@ -121,7 +122,7 @@ describe('Inquiries API', () => {
       await request(app)
         .post('/api/v1/inquiries')
         .send({
-          user_slug: 'test_maoyang',
+          user_slug: testSlug,
           customer_name: '客户1',
           character_name: '胡桃'
         })
@@ -129,7 +130,7 @@ describe('Inquiries API', () => {
       await request(app)
         .post('/api/v1/inquiries')
         .send({
-          user_slug: 'test_maoyang',
+          user_slug: testSlug,
           customer_name: '客户2',
           character_name: '甘雨'
         })
@@ -171,7 +172,7 @@ describe('Inquiries API', () => {
       const createRes = await request(app)
         .post('/api/v1/inquiries')
         .send({
-          user_slug: 'test_maoyang',
+          user_slug: testSlug,
           customer_name: '测试客户',
           character_name: '胡桃',
           wig_source: 'client_sends',
@@ -230,7 +231,7 @@ describe('Inquiries API', () => {
       const createRes = await request(app)
         .post('/api/v1/inquiries')
         .send({
-          user_slug: 'test_maoyang',
+          user_slug: testSlug,
           customer_name: '测试客户',
           character_name: '胡桃'
         })
@@ -272,7 +273,7 @@ describe('Inquiries API', () => {
       const createRes = await request(app)
         .post('/api/v1/inquiries')
         .send({
-          user_slug: 'test_maoyang',
+          user_slug: testSlug,
           customer_name: '测试客户',
           customer_contact: 'wx: test',
           character_name: '胡桃',
@@ -360,7 +361,7 @@ describe('Inquiries API', () => {
       const createRes = await request(app)
         .post('/api/v1/inquiries')
         .send({
-          user_slug: 'test_maoyang',
+          user_slug: testSlug,
           customer_name: '测试客户',
           character_name: '胡桃'
         })

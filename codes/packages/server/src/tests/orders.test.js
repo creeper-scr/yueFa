@@ -5,7 +5,8 @@ import { SmsCodeModel } from '../models/SmsCode.js'
 import { ORDER_STATUS } from '../models/Order.js'
 
 describe('Orders API', () => {
-  const testPhone = '13800138000'
+  const testPhone = '13800138001'  // 唯一手机号，避免与其他测试冲突
+  const testSlug = 'test_orders_user'  // 唯一 slug
   let token
   let inquiryId
   let orderId
@@ -22,13 +23,13 @@ describe('Orders API', () => {
     await request(app)
       .put('/api/v1/users/profile')
       .set('Authorization', `Bearer ${token}`)
-      .send({ slug: 'test_maoyang' })
+      .send({ slug: testSlug })
 
     // 创建询价 (PRD F-01 - 包含毛坯来源)
     const inquiryRes = await request(app)
       .post('/api/v1/inquiries')
       .send({
-        user_slug: 'test_maoyang',
+        user_slug: testSlug,
         customer_name: '测试客户',
         customer_contact: 'wx: test',
         character_name: '胡桃',
@@ -182,7 +183,7 @@ describe('Orders API', () => {
       const inquiryRes = await request(app)
         .post('/api/v1/inquiries')
         .send({
-          user_slug: 'test_maoyang',
+          user_slug: testSlug,
           customer_name: '客户2',
           customer_contact: 'wx: test2',
           character_name: '甘雨',

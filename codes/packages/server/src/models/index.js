@@ -49,8 +49,9 @@ export const saveDb = () => {
 
 /**
  * 执行查询 (INSERT/UPDATE/DELETE)
+ * 注意：同步接口，兼容 SQLite 和 PostgreSQL
  */
-export const runQuery = async (sql, params = []) => {
+export const runQuery = (sql, params = []) => {
   if (!dbModule) {
     throw new Error('Database not initialized. Call initDb() first.')
   }
@@ -65,8 +66,9 @@ export const runQuery = async (sql, params = []) => {
 
 /**
  * 执行 SELECT 查询
+ * 注意：同步接口，兼容 SQLite 和 PostgreSQL
  */
-export const selectQuery = async (sql, params = []) => {
+export const selectQuery = (sql, params = []) => {
   if (!dbModule) {
     throw new Error('Database not initialized. Call initDb() first.')
   }
@@ -80,8 +82,9 @@ export const selectQuery = async (sql, params = []) => {
 
 /**
  * 执行 SELECT 查询返回单行
+ * 注意：同步接口，兼容 SQLite 和 PostgreSQL
  */
-export const selectOne = async (sql, params = []) => {
+export const selectOne = (sql, params = []) => {
   if (!dbModule) {
     throw new Error('Database not initialized. Call initDb() first.')
   }
