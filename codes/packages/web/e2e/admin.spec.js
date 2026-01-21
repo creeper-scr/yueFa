@@ -92,10 +92,11 @@ test.describe('个人资料编辑页面', () => {
     await page.goto('/admin/profile')
 
     // 检查表单字段 (使用 placeholder 定位，因为 Vant 的 label 是通过 aria-labelledby 关联的)
-    await expect(page.getByPlaceholder('店铺名称（如：XXX发艺工作室）')).toBeVisible()
-    await expect(page.getByPlaceholder('链接后缀（如: my-shop）')).toBeVisible()
-    await expect(page.getByPlaceholder('微信号/QQ（方便客户联系）')).toBeVisible()
-    await expect(page.getByPlaceholder('输入店铺公告...')).toBeVisible()
+    // placeholder 值与 Profile.vue 组件中的定义一致
+    await expect(page.getByPlaceholder('给你的店铺起个名字')).toBeVisible()
+    await expect(page.getByPlaceholder('如: maoyang001')).toBeVisible()
+    await expect(page.getByPlaceholder('客户可通过此微信号联系你')).toBeVisible()
+    await expect(page.getByPlaceholder('向客户展示你的档期、特色等信息')).toBeVisible()
   })
 
   test('应该预填充用户数据', async ({ page }) => {
@@ -105,9 +106,10 @@ test.describe('个人资料编辑页面', () => {
     await page.waitForTimeout(500)
 
     // 验证数据预填充 (使用 placeholder 定位)
-    await expect(page.getByPlaceholder('店铺名称（如：XXX发艺工作室）')).toHaveValue('测试毛娘')
-    await expect(page.getByPlaceholder('链接后缀（如: my-shop）')).toHaveValue('test-shop')
-    await expect(page.getByPlaceholder('微信号/QQ（方便客户联系）')).toHaveValue('test_wechat')
+    // mockData.user: nickname='测试毛娘', slug='test-shop', wechat_id='test_wechat'
+    await expect(page.getByPlaceholder('给你的店铺起个名字')).toHaveValue('测试毛娘')
+    await expect(page.getByPlaceholder('如: maoyang001')).toHaveValue('test-shop')
+    await expect(page.getByPlaceholder('客户可通过此微信号联系你')).toHaveValue('test_wechat')
   })
 
   test('应该能编辑并保存资料', async ({ page }) => {
@@ -117,8 +119,8 @@ test.describe('个人资料编辑页面', () => {
     await page.waitForTimeout(500)
 
     // 修改店铺名称 (使用 placeholder 定位)
-    await page.getByPlaceholder('店铺名称（如：XXX发艺工作室）').clear()
-    await page.getByPlaceholder('店铺名称（如：XXX发艺工作室）').fill('新店铺名称')
+    await page.getByPlaceholder('给你的店铺起个名字').clear()
+    await page.getByPlaceholder('给你的店铺起个名字').fill('新店铺名称')
 
     // 保存
     await page.getByRole('button', { name: '保存' }).click()
