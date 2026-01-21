@@ -50,7 +50,7 @@ export default defineConfig({
   // 启动开发服务器（前端和后端）
   webServer: [
     {
-      command: 'node src/app.js',
+      command: 'node src/e2e-server.js',
       url: 'http://localhost:4000/api/health',
       reuseExistingServer: !process.env.CI,
       timeout: 120 * 1000,
