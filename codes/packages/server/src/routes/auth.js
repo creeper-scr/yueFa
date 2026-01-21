@@ -17,7 +17,8 @@ const generateCode = () => {
 }
 
 // 发送验证码
-router.post('/sms/send',
+router.post(
+  '/sms/send',
   body('phone').matches(phoneRegex).withMessage('手机号格式不正确'),
   async (req, res, next) => {
     try {
@@ -41,7 +42,6 @@ router.post('/sms/send',
 
       // 开发环境直接返回验证码，生产环境调用短信服务
       if (process.env.NODE_ENV === 'development') {
-        console.log(`[DEV] SMS Code for ${phone}: ${code}`)
         return res.json({
           code: 0,
           message: '验证码已发送',
@@ -63,7 +63,8 @@ router.post('/sms/send',
 )
 
 // 登录/注册
-router.post('/login',
+router.post(
+  '/login',
   body('phone').matches(phoneRegex).withMessage('手机号格式不正确'),
   body('code').isLength({ min: 6, max: 6 }).withMessage('验证码格式不正确'),
   async (req, res, next) => {
@@ -88,11 +89,9 @@ router.post('/login',
       }
 
       // 生成JWT
-      const token = jwt.sign(
-        { userId: user.id, phone: user.phone },
-        process.env.JWT_SECRET,
-        { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
-      )
+      const token = jwt.sign({ userId: user.id, phone: user.phone }, process.env.JWT_SECRET, {
+        expiresIn: process.env.JWT_EXPIRES_IN || '7d'
+      })
 
       // 隐藏部分手机号
       const maskedPhone = phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2')

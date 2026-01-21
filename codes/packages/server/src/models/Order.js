@@ -3,15 +3,15 @@ import { v4 as uuidv4 } from 'uuid'
 
 // PRD 2.0 订单状态常量 (9个状态)
 export const ORDER_STATUS = {
-  PENDING_QUOTE: 'pending_quote',       // 待报价
-  PENDING_DEPOSIT: 'pending_deposit',   // 待付定金
+  PENDING_QUOTE: 'pending_quote', // 待报价
+  PENDING_DEPOSIT: 'pending_deposit', // 待付定金
   AWAITING_WIG_BASE: 'awaiting_wig_base', // 等毛坯 (客户寄)
-  QUEUED: 'queued',                     // 排单中
-  IN_PROGRESS: 'in_progress',           // 制作中
-  IN_REVIEW: 'in_review',               // 验收中
-  PENDING_BALANCE: 'pending_balance',   // 待尾款
-  SHIPPED: 'shipped',                   // 已发货
-  COMPLETED: 'completed'                // 已完成
+  QUEUED: 'queued', // 排单中
+  IN_PROGRESS: 'in_progress', // 制作中
+  IN_REVIEW: 'in_review', // 验收中
+  PENDING_BALANCE: 'pending_balance', // 待尾款
+  SHIPPED: 'shipped', // 已发货
+  COMPLETED: 'completed' // 已完成
 }
 
 // 状态中文映射
@@ -73,7 +73,7 @@ export const OrderModel = {
     params.push(limit, (page - 1) * limit)
 
     const rows = selectQuery(sql, params)
-    return rows.map(row => this._parseOrder(row))
+    return rows.map((row) => this._parseOrder(row))
   },
 
   // 获取订单总数
@@ -92,12 +92,15 @@ export const OrderModel = {
 
   // 按状态统计订单数 (PRD 2.0 升级为9状态)
   countByStatus(userId) {
-    const rows = selectQuery(`
+    const rows = selectQuery(
+      `
       SELECT status, COUNT(*) as count
       FROM orders
       WHERE user_id = ?
       GROUP BY status
-    `, [userId])
+    `,
+      [userId]
+    )
 
     const result = {
       pending_quote: 0,
@@ -127,7 +130,8 @@ export const OrderModel = {
     const now = new Date()
     const sevenDaysLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
 
-    const rows = selectQuery(`
+    const rows = selectQuery(
+      `
       SELECT id, character_name, source_work, deadline, status
       FROM orders
       WHERE user_id = ?
@@ -135,9 +139,11 @@ export const OrderModel = {
         AND deadline <= ?
         AND status NOT IN ('shipped', 'completed')
       ORDER BY deadline ASC
-    `, [userId, sevenDaysLater.toISOString().split('T')[0]])
+    `,
+      [userId, sevenDaysLater.toISOString().split('T')[0]]
+    )
 
-    return rows.map(row => {
+    return rows.map((row) => {
       const deadline = new Date(row.deadline)
       const daysLeft = Math.ceil((deadline - now) / (24 * 60 * 60 * 1000))
 
@@ -168,7 +174,8 @@ export const OrderModel = {
       balance = Math.round(data.price * 0.8 * 100) / 100 // 80%
     }
 
-    runQuery(`
+    runQuery(
+      `
       INSERT INTO orders (
         id, user_id, inquiry_id, customer_name, customer_contact,
         character_name, source_work, reference_images, head_circumference, head_notes,
@@ -176,16 +183,30 @@ export const OrderModel = {
         production_notes, status, notes, created_at, updated_at
       )
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `, [
-      id, data.user_id, data.inquiry_id || null,
-      data.customer_name || null, data.customer_contact || null,
-      data.character_name, data.source_work || null, referenceImages,
-      data.head_circumference || null, data.head_notes || null,
-      data.wig_source || 'client_sends',
-      data.price || null, deposit || null, balance || null,
-      data.deadline || null, data.production_notes || null,
-      data.status || 'pending_quote', notes, now, now
-    ])
+    `,
+      [
+        id,
+        data.user_id,
+        data.inquiry_id || null,
+        data.customer_name || null,
+        data.customer_contact || null,
+        data.character_name,
+        data.source_work || null,
+        referenceImages,
+        data.head_circumference || null,
+        data.head_notes || null,
+        data.wig_source || 'client_sends',
+        data.price || null,
+        deposit || null,
+        balance || null,
+        data.deadline || null,
+        data.production_notes || null,
+        data.status || 'pending_quote',
+        notes,
+        now,
+        now
+      ]
+    )
 
     return this.findById(id)
   },
@@ -233,15 +254,17 @@ export const OrderModel = {
     const now = new Date().toISOString()
 
     // 根据wig_source决定下一状态
-    let nextStatus = order.wig_source === 'client_sends'
-      ? ORDER_STATUS.AWAITING_WIG_BASE
-      : ORDER_STATUS.QUEUED
+    let nextStatus =
+      order.wig_source === 'client_sends' ? ORDER_STATUS.AWAITING_WIG_BASE : ORDER_STATUS.QUEUED
 
-    runQuery(`
+    runQuery(
+      `
       UPDATE orders
       SET deposit_paid_at = ?, deposit_screenshot = ?, status = ?, updated_at = ?
       WHERE id = ?
-    `, [now, screenshot || null, nextStatus, now, id])
+    `,
+      [now, screenshot || null, nextStatus, now, id]
+    )
 
     return this.findById(id)
   },
@@ -250,11 +273,14 @@ export const OrderModel = {
   confirmWigReceived(id, trackingNo) {
     const now = new Date().toISOString()
 
-    runQuery(`
+    runQuery(
+      `
       UPDATE orders
       SET wig_received_at = ?, wig_tracking_no = ?, status = ?, updated_at = ?
       WHERE id = ?
-    `, [now, trackingNo || null, ORDER_STATUS.QUEUED, now, id])
+    `,
+      [now, trackingNo || null, ORDER_STATUS.QUEUED, now, id]
+    )
 
     return this.findById(id)
   },
@@ -263,11 +289,14 @@ export const OrderModel = {
   confirmBalance(id, screenshot) {
     const now = new Date().toISOString()
 
-    runQuery(`
+    runQuery(
+      `
       UPDATE orders
       SET balance_paid_at = ?, balance_screenshot = ?, updated_at = ?
       WHERE id = ?
-    `, [now, screenshot || null, now, id])
+    `,
+      [now, screenshot || null, now, id]
+    )
 
     return this.findById(id)
   },
@@ -277,20 +306,23 @@ export const OrderModel = {
     const now = new Date().toISOString()
     const checklist = data.checklist ? JSON.stringify(data.checklist) : null
 
-    runQuery(`
+    runQuery(
+      `
       UPDATE orders
       SET shipping_company = ?, shipping_no = ?, shipped_at = ?,
           shipping_checklist = ?, status = ?, updated_at = ?
       WHERE id = ?
-    `, [
-      data.shipping_company || null,
-      data.shipping_no || null,
-      now,
-      checklist,
-      ORDER_STATUS.SHIPPED,
-      now,
-      id
-    ])
+    `,
+      [
+        data.shipping_company || null,
+        data.shipping_no || null,
+        now,
+        checklist,
+        ORDER_STATUS.SHIPPED,
+        now,
+        id
+      ]
+    )
 
     return this.findById(id)
   },
@@ -307,8 +339,11 @@ export const OrderModel = {
       created_at: new Date().toISOString()
     })
 
-    runQuery('UPDATE orders SET notes = ?, updated_at = ? WHERE id = ?',
-      [JSON.stringify(notes), new Date().toISOString(), id])
+    runQuery('UPDATE orders SET notes = ?, updated_at = ? WHERE id = ?', [
+      JSON.stringify(notes),
+      new Date().toISOString(),
+      id
+    ])
 
     return this.findById(id)
   },

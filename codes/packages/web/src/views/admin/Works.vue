@@ -18,10 +18,19 @@
         >
           <van-image :src="work.thumbnail_url || work.image_url" fit="cover" class="work-image" />
           <div class="work-info">
-            <div class="work-title">{{ work.title || '未命名' }}</div>
-            <div class="work-source">{{ work.source_work || '-' }}</div>
-            <div class="work-tags" v-if="work.tags?.length">
-              <van-tag v-for="tag in work.tags.slice(0, 2)" :key="tag" size="small" plain>
+            <div class="work-title">
+              {{ work.title || '未命名' }}
+            </div>
+            <div class="work-source">
+              {{ work.source_work || '-' }}
+            </div>
+            <div v-if="work.tags?.length" class="work-tags">
+              <van-tag
+                v-for="tag in work.tags.slice(0, 2)"
+                :key="tag"
+                size="small"
+                plain
+              >
                 {{ tag }}
               </van-tag>
             </div>
@@ -104,7 +113,7 @@ const fetchWorks = async () => {
     if (res.code === 0) {
       works.value = res.data || []
     }
-  } catch (error) {
+  } catch (_error) {
     showToast('加载失败')
   } finally {
     loading.value = false
@@ -169,8 +178,8 @@ const handleDialogClose = async (action) => {
     fetchWorks()
     resetForm()
     return true
-  } catch (error) {
-    showToast(error.message || '操作失败')
+  } catch (_error) {
+    showToast('操作失败')
     return false
   }
 }

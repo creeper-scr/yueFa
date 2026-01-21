@@ -11,7 +11,9 @@ const router = express.Router()
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 // 获取预签名上传URL
-router.post('/presign', auth,
+router.post(
+  '/presign',
+  auth,
   body('type').isIn(['work', 'avatar', 'reference']).withMessage('无效的上传类型'),
   body('filename').notEmpty().withMessage('文件名不能为空'),
   body('content_type').notEmpty().withMessage('文件类型不能为空'),
@@ -22,7 +24,7 @@ router.post('/presign', auth,
         throw new AppError(1001, errors.array()[0].msg)
       }
 
-      const { type, filename, content_type } = req.body
+      const { type, filename, content_type: _contentType } = req.body
 
       // 生成唯一文件名
       const ext = path.extname(filename)

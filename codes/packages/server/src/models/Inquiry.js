@@ -27,7 +27,7 @@ export const InquiryModel = {
     params.push(limit, (page - 1) * limit)
 
     const rows = selectQuery(sql, params)
-    return rows.map(row => ({
+    return rows.map((row) => ({
       ...row,
       reference_images: row.reference_images ? JSON.parse(row.reference_images) : []
     }))
@@ -49,12 +49,15 @@ export const InquiryModel = {
 
   // 按状态统计询价数
   countByStatus(userId) {
-    const rows = selectQuery(`
+    const rows = selectQuery(
+      `
       SELECT status, COUNT(*) as count
       FROM inquiries
       WHERE user_id = ?
       GROUP BY status
-    `, [userId])
+    `,
+      [userId]
+    )
 
     const result = {
       new: 0,
@@ -78,16 +81,30 @@ export const InquiryModel = {
     const referenceImages = data.reference_images ? JSON.stringify(data.reference_images) : null
     const now = new Date().toISOString()
 
-    runQuery(`
+    runQuery(
+      `
       INSERT INTO inquiries (id, user_id, customer_name, customer_contact, character_name,
                             source_work, expected_deadline, head_circumference, head_notes,
                             wig_source, budget_range, reference_images, special_requirements, created_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `, [id, data.user_id, data.customer_name || null, data.customer_contact || null,
-        data.character_name, data.source_work || null, data.expected_deadline || null,
-        data.head_circumference || null, data.head_notes || null,
-        data.wig_source || 'client_sends', data.budget_range || null,
-        referenceImages, data.special_requirements || null, now])
+    `,
+      [
+        id,
+        data.user_id,
+        data.customer_name || null,
+        data.customer_contact || null,
+        data.character_name,
+        data.source_work || null,
+        data.expected_deadline || null,
+        data.head_circumference || null,
+        data.head_notes || null,
+        data.wig_source || 'client_sends',
+        data.budget_range || null,
+        referenceImages,
+        data.special_requirements || null,
+        now
+      ]
+    )
 
     return this.findById(id)
   },
@@ -103,9 +120,19 @@ export const InquiryModel = {
     const fields = []
     const values = []
 
-    const allowedFields = ['customer_name', 'customer_contact', 'character_name',
-                          'source_work', 'expected_deadline', 'head_circumference',
-                          'head_notes', 'wig_source', 'budget_range', 'special_requirements', 'status']
+    const allowedFields = [
+      'customer_name',
+      'customer_contact',
+      'character_name',
+      'source_work',
+      'expected_deadline',
+      'head_circumference',
+      'head_notes',
+      'wig_source',
+      'budget_range',
+      'special_requirements',
+      'status'
+    ]
 
     for (const [key, value] of Object.entries(data)) {
       if (value !== undefined && allowedFields.includes(key)) {

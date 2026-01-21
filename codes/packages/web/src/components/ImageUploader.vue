@@ -9,8 +9,8 @@
     :deletable="deletable"
     @delete="handleDelete"
   >
-    <template #default v-if="$slots.default">
-      <slot />
+    <template v-if="$slots.default" #default>
+      <slot></slot>
     </template>
   </van-uploader>
 </template>
@@ -128,7 +128,7 @@ const handleAfterRead = async (file) => {
 }
 
 // 删除
-const handleDelete = (file) => {
+const handleDelete = (_file) => {
   updateModelValue()
 }
 

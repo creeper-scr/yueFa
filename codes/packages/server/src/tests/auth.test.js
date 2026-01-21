@@ -9,9 +9,7 @@ describe('Auth API', () => {
 
   describe('POST /api/v1/auth/sms/send', () => {
     it('应该成功发送验证码', async () => {
-      const res = await request(app)
-        .post('/api/v1/auth/sms/send')
-        .send({ phone: testPhone })
+      const res = await request(app).post('/api/v1/auth/sms/send').send({ phone: testPhone })
 
       expect(res.status).toBe(200)
       expect(res.body.code).toBe(0)
@@ -22,9 +20,7 @@ describe('Auth API', () => {
     })
 
     it('应该拒绝无效的手机号', async () => {
-      const res = await request(app)
-        .post('/api/v1/auth/sms/send')
-        .send({ phone: '123456' })
+      const res = await request(app).post('/api/v1/auth/sms/send').send({ phone: '123456' })
 
       expect(res.status).toBe(400)
       expect(res.body.code).toBe(1003)
@@ -32,14 +28,10 @@ describe('Auth API', () => {
 
     it('应该限制发送频率', async () => {
       // 第一次发送
-      await request(app)
-        .post('/api/v1/auth/sms/send')
-        .send({ phone: testPhone })
+      await request(app).post('/api/v1/auth/sms/send').send({ phone: testPhone })
 
       // 立即再次发送
-      const res = await request(app)
-        .post('/api/v1/auth/sms/send')
-        .send({ phone: testPhone })
+      const res = await request(app).post('/api/v1/auth/sms/send').send({ phone: testPhone })
 
       expect(res.body.code).toBe(1001)
       expect(res.body.message).toContain('频繁')
@@ -65,9 +57,7 @@ describe('Auth API', () => {
     })
 
     it('应该为新用户自动创建账号', async () => {
-      await request(app)
-        .post('/api/v1/auth/login')
-        .send({ phone: testPhone, code: '123456' })
+      await request(app).post('/api/v1/auth/login').send({ phone: testPhone, code: '123456' })
 
       const user = UserModel.findByPhone(testPhone)
       expect(user).toBeDefined()
@@ -95,9 +85,7 @@ describe('Auth API', () => {
     })
 
     it('应该返回当前用户信息', async () => {
-      const res = await request(app)
-        .get('/api/v1/auth/me')
-        .set('Authorization', `Bearer ${token}`)
+      const res = await request(app).get('/api/v1/auth/me').set('Authorization', `Bearer ${token}`)
 
       expect(res.status).toBe(200)
       expect(res.body.code).toBe(0)
@@ -113,8 +101,7 @@ describe('Auth API', () => {
     })
 
     it('应该拒绝没有token的请求', async () => {
-      const res = await request(app)
-        .get('/api/v1/auth/me')
+      const res = await request(app).get('/api/v1/auth/me')
 
       expect(res.body.code).toBe(2001)
     })

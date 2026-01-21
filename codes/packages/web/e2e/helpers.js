@@ -15,7 +15,7 @@ export const mockData = {
     avatar_url: null,
     wechat_id: 'test_wechat',
     announcement: '欢迎来到测试店铺',
-    accepting_orders: true,
+    accepting_orders: true
   },
 
   // 作品数据
@@ -28,7 +28,7 @@ export const mockData = {
       cover_url: 'https://via.placeholder.com/300x400/FF6B6B/ffffff?text=Work1',
       images: ['https://via.placeholder.com/600x800/FF6B6B/ffffff?text=Work1-1'],
       is_pinned: true,
-      display_order: 1,
+      display_order: 1
     },
     {
       id: 'work-2',
@@ -38,8 +38,8 @@ export const mockData = {
       cover_url: 'https://via.placeholder.com/300x400/6B8EFF/ffffff?text=Work2',
       images: ['https://via.placeholder.com/600x800/6B8EFF/ffffff?text=Work2-1'],
       is_pinned: false,
-      display_order: 2,
-    },
+      display_order: 2
+    }
   ],
 
   // 订单数据 (PRD 2.0 九状态)
@@ -55,7 +55,7 @@ export const mockData = {
       balance: 400,
       wig_source: 'client_sends',
       deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      created_at: new Date().toISOString(),
+      created_at: new Date().toISOString()
     },
     {
       id: 'order-2',
@@ -68,7 +68,7 @@ export const mockData = {
       balance: 480,
       wig_source: 'stylist_buys',
       deadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      created_at: new Date(Date.now() - 86400000).toISOString(),
+      created_at: new Date(Date.now() - 86400000).toISOString()
     },
     {
       id: 'order-3',
@@ -81,8 +81,8 @@ export const mockData = {
       balance: 360,
       wig_source: 'client_sends',
       deadline: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      created_at: new Date(Date.now() - 86400000 * 3).toISOString(),
-    },
+      created_at: new Date(Date.now() - 86400000 * 3).toISOString()
+    }
   ],
 
   // 订单统计 (PRD B-01)
@@ -96,7 +96,7 @@ export const mockData = {
     pending_balance: 0,
     shipped: 0,
     completed: 0,
-    total: 3,
+    total: 3
   },
 
   // 死线预警 (PRD B-02)
@@ -140,9 +140,7 @@ export const mockData = {
         character_name: '洛天依',
         source_work: 'VOCALOID'
       },
-      images: [
-        'https://via.placeholder.com/600x800/FF6B6B/ffffff?text=Approved1'
-      ],
+      images: ['https://via.placeholder.com/600x800/FF6B6B/ffffff?text=Approved1'],
       description: '制作完成',
       review_token: 'test-review-token-approved',
       is_approved: true,
@@ -158,9 +156,7 @@ export const mockData = {
         character_name: '蕾姆',
         source_work: 'Re:Zero'
       },
-      images: [
-        'https://via.placeholder.com/600x800/FF6B6B/ffffff?text=Revision1'
-      ],
+      images: ['https://via.placeholder.com/600x800/FF6B6B/ffffff?text=Revision1'],
       description: '修改后的成品',
       review_token: 'test-review-token-revision',
       is_approved: false,
@@ -212,8 +208,8 @@ export async function setupMockApi(page) {
       body: JSON.stringify({
         code: 0,
         message: 'success',
-        data: { code: '123456' }, // 开发环境返回验证码
-      }),
+        data: { code: '123456' } // 开发环境返回验证码
+      })
     })
   })
 
@@ -229,9 +225,9 @@ export async function setupMockApi(page) {
           message: 'success',
           data: {
             token: 'test-jwt-token',
-            user: mockData.user,
-          },
-        }),
+            user: mockData.user
+          }
+        })
       })
     } else {
       await route.fulfill({
@@ -239,8 +235,8 @@ export async function setupMockApi(page) {
         contentType: 'application/json',
         body: JSON.stringify({
           code: 1002,
-          message: '验证码错误',
-        }),
+          message: '验证码错误'
+        })
       })
     }
   })
@@ -252,8 +248,8 @@ export async function setupMockApi(page) {
       contentType: 'application/json',
       body: JSON.stringify({
         code: 0,
-        data: mockData.user,
-      }),
+        data: mockData.user
+      })
     })
   })
 
@@ -265,8 +261,8 @@ export async function setupMockApi(page) {
         contentType: 'application/json',
         body: JSON.stringify({
           code: 0,
-          data: mockData.user,
-        }),
+          data: mockData.user
+        })
       })
     } else if (route.request().method() === 'PUT') {
       await route.fulfill({
@@ -275,8 +271,8 @@ export async function setupMockApi(page) {
         body: JSON.stringify({
           code: 0,
           message: '保存成功',
-          data: mockData.user,
-        }),
+          data: mockData.user
+        })
       })
     } else {
       await route.continue()
@@ -290,8 +286,8 @@ export async function setupMockApi(page) {
       contentType: 'application/json',
       body: JSON.stringify({
         code: 0,
-        data: mockData.user,
-      }),
+        data: mockData.user
+      })
     })
   })
 
@@ -302,8 +298,8 @@ export async function setupMockApi(page) {
       contentType: 'application/json',
       body: JSON.stringify({
         code: 0,
-        data: mockData.works,
-      }),
+        data: mockData.works
+      })
     })
   })
 
@@ -315,8 +311,8 @@ export async function setupMockApi(page) {
         contentType: 'application/json',
         body: JSON.stringify({
           code: 0,
-          data: mockData.works,
-        }),
+          data: mockData.works
+        })
       })
     } else {
       await route.continue()
@@ -335,12 +331,12 @@ export async function setupMockApi(page) {
           pagination: {
             page: 1,
             limit: 20,
-            total: mockData.orders.length,
+            total: mockData.orders.length
           },
           statusCount: mockData.orderStats,
-          deadlineAlerts: mockData.deadlineAlerts,
-        },
-      }),
+          deadlineAlerts: mockData.deadlineAlerts
+        }
+      })
     })
   })
 
@@ -351,8 +347,8 @@ export async function setupMockApi(page) {
       contentType: 'application/json',
       body: JSON.stringify({
         code: 0,
-        data: mockData.orderStats,
-      }),
+        data: mockData.orderStats
+      })
     })
   })
 
@@ -363,8 +359,8 @@ export async function setupMockApi(page) {
       contentType: 'application/json',
       body: JSON.stringify({
         code: 0,
-        message: '状态已更新',
-      }),
+        message: '状态已更新'
+      })
     })
   })
 
@@ -376,8 +372,8 @@ export async function setupMockApi(page) {
       body: JSON.stringify({
         code: 0,
         message: '定金已确认',
-        data: { status: 'awaiting_wig_base' },
-      }),
+        data: { status: 'awaiting_wig_base' }
+      })
     })
   })
 
@@ -389,8 +385,8 @@ export async function setupMockApi(page) {
       body: JSON.stringify({
         code: 0,
         message: '毛坯已确认收货',
-        data: { status: 'queued' },
-      }),
+        data: { status: 'queued' }
+      })
     })
   })
 
@@ -402,8 +398,8 @@ export async function setupMockApi(page) {
       body: JSON.stringify({
         code: 0,
         message: '已发货',
-        data: { status: 'shipped' },
-      }),
+        data: { status: 'shipped' }
+      })
     })
   })
 
@@ -417,8 +413,8 @@ export async function setupMockApi(page) {
         contentType: 'application/json',
         body: JSON.stringify({
           code: 0,
-          data: mockData.reviews.pending,
-        }),
+          data: mockData.reviews.pending
+        })
       })
     } else if (url.includes('test-review-token-approved')) {
       await route.fulfill({
@@ -426,8 +422,8 @@ export async function setupMockApi(page) {
         contentType: 'application/json',
         body: JSON.stringify({
           code: 0,
-          data: mockData.reviews.approved,
-        }),
+          data: mockData.reviews.approved
+        })
       })
     } else if (url.includes('test-review-token-revision')) {
       await route.fulfill({
@@ -435,8 +431,8 @@ export async function setupMockApi(page) {
         contentType: 'application/json',
         body: JSON.stringify({
           code: 0,
-          data: mockData.reviews.withRevisions,
-        }),
+          data: mockData.reviews.withRevisions
+        })
       })
     } else {
       await route.fulfill({
@@ -444,8 +440,8 @@ export async function setupMockApi(page) {
         contentType: 'application/json',
         body: JSON.stringify({
           code: 1,
-          message: '链接无效',
-        }),
+          message: '链接无效'
+        })
       })
     }
   })
@@ -458,8 +454,8 @@ export async function setupMockApi(page) {
       body: JSON.stringify({
         code: 0,
         message: '验收已确认',
-        data: { is_approved: true },
-      }),
+        data: { is_approved: true }
+      })
     })
   })
 
@@ -474,9 +470,9 @@ export async function setupMockApi(page) {
           message: '修改请求已提交',
           data: {
             revision_number: 1,
-            remaining_revisions: 1,
-          },
-        }),
+            remaining_revisions: 1
+          }
+        })
       })
     } else {
       await route.continue()
@@ -495,9 +491,9 @@ export async function setupMockApi(page) {
           data: {
             id: 'new-review-id',
             review_url: 'http://localhost:3000/review/new-token',
-            max_revisions: 2,
-          },
-        }),
+            max_revisions: 2
+          }
+        })
       })
     } else {
       await route.continue()
@@ -511,8 +507,8 @@ export async function setupMockApi(page) {
       contentType: 'application/json',
       body: JSON.stringify({
         code: 0,
-        data: mockData.reviews.pending,
-      }),
+        data: mockData.reviews.pending
+      })
     })
   })
 
@@ -525,8 +521,8 @@ export async function setupMockApi(page) {
         body: JSON.stringify({
           code: 0,
           message: '询价提交成功',
-          data: { id: 'inquiry-1' },
-        }),
+          data: { id: 'inquiry-1' }
+        })
       })
     } else if (route.request().method() === 'GET') {
       await route.fulfill({
@@ -536,9 +532,9 @@ export async function setupMockApi(page) {
           code: 0,
           data: {
             list: [],
-            pagination: { page: 1, limit: 20, total: 0 },
-          },
-        }),
+            pagination: { page: 1, limit: 20, total: 0 }
+          }
+        })
       })
     } else {
       await route.continue()

@@ -1,8 +1,12 @@
 <template>
   <div class="login-page">
     <div class="login-header">
-      <h1 class="title">约发</h1>
-      <p class="subtitle">Cosplay假发造型师专属工具</p>
+      <h1 class="title">
+        约发
+      </h1>
+      <p class="subtitle">
+        Cosplay假发造型师专属工具
+      </p>
     </div>
 
     <div class="login-form">
@@ -56,7 +60,9 @@
         </div>
       </van-form>
 
-      <p class="login-tip">未注册的手机号将自动创建账号</p>
+      <p class="login-tip">
+        未注册的手机号将自动创建账号
+      </p>
     </div>
   </div>
 </template>

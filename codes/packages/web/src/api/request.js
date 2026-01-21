@@ -1,5 +1,4 @@
 import axios from 'axios'
-import { showToast } from 'vant'
 
 const request = axios.create({
   baseURL: '/api/v1',
@@ -34,15 +33,21 @@ request.interceptors.response.use(
         return Promise.reject(new Error('登录已过期'))
       }
 
-      showToast(res.message || '请求失败')
-      return Promise.reject(new Error(res.message || '请求失败'))
+      // 创建标准错误对象,不自动显示 Toast,让调用者决定如何处理
+      const error = new Error(res.message || '请求失败')
+      error.code = res.code
+      error.errors = res.errors || []
+      return Promise.reject(error)
     }
 
     return res
   },
   (error) => {
-    showToast(error.message || '网络错误')
-    return Promise.reject(error)
+    // 网络错误,返回标准错误对象
+    const err = new Error(error.message || '网络错误')
+    err.code = -1
+    err.errors = []
+    return Promise.reject(err)
   }
 )
 

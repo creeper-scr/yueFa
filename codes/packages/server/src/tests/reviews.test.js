@@ -5,8 +5,8 @@ import { SmsCodeModel } from '../models/SmsCode.js'
 import { ORDER_STATUS } from '../models/Order.js'
 
 describe('Reviews API (PRD R系列)', () => {
-  const testPhone = '13800138002'  // 唯一手机号，避免与其他测试冲突
-  const testSlug = 'test_reviews_user'  // 唯一 slug
+  const testPhone = '13800138002' // 唯一手机号，避免与其他测试冲突
+  const testSlug = 'test_reviews_user' // 唯一 slug
   let token
   let orderId
   let reviewId
@@ -15,16 +15,14 @@ describe('Reviews API (PRD R系列)', () => {
   // 辅助函数：准备订单到制作中状态
   const prepareOrderToInProgress = async () => {
     // 创建询价
-    const inquiryRes = await request(app)
-      .post('/api/v1/inquiries')
-      .send({
-        user_slug: testSlug,
-        customer_name: '测试客户',
-        customer_contact: 'wx: test',
-        character_name: '胡桃',
-        source_work: '原神',
-        wig_source: 'client_sends'
-      })
+    const inquiryRes = await request(app).post('/api/v1/inquiries').send({
+      user_slug: testSlug,
+      customer_name: '测试客户',
+      customer_contact: 'wx: test',
+      character_name: '胡桃',
+      source_work: '原神',
+      wig_source: 'client_sends'
+    })
 
     // 转为订单
     const convertRes = await request(app)
@@ -185,8 +183,7 @@ describe('Reviews API (PRD R系列)', () => {
     })
 
     it('应该通过token访问验收页 (无需登录)', async () => {
-      const res = await request(app)
-        .get(`/api/v1/reviews/token/${reviewToken}`)
+      const res = await request(app).get(`/api/v1/reviews/token/${reviewToken}`)
 
       expect(res.status).toBe(200)
       expect(res.body.code).toBe(0)
@@ -197,8 +194,7 @@ describe('Reviews API (PRD R系列)', () => {
     })
 
     it('应该返回订单的脱敏信息', async () => {
-      const res = await request(app)
-        .get(`/api/v1/reviews/token/${reviewToken}`)
+      const res = await request(app).get(`/api/v1/reviews/token/${reviewToken}`)
 
       // 只返回角色和作品名，不返回客户联系方式等敏感信息
       expect(res.body.data.order.character_name).toBeDefined()
@@ -207,8 +203,7 @@ describe('Reviews API (PRD R系列)', () => {
     })
 
     it('应该拒绝无效的token', async () => {
-      const res = await request(app)
-        .get('/api/v1/reviews/token/invalid_token_12345')
+      const res = await request(app).get('/api/v1/reviews/token/invalid_token_12345')
 
       expect(res.body.code).toBe(3001)
     })
@@ -240,9 +235,7 @@ describe('Reviews API (PRD R系列)', () => {
     })
 
     it('确认满意后订单状态应该变为待尾款', async () => {
-      await request(app)
-        .post(`/api/v1/reviews/${reviewId}/approve`)
-        .send({ token: reviewToken })
+      await request(app).post(`/api/v1/reviews/${reviewId}/approve`).send({ token: reviewToken })
 
       const orderRes = await request(app)
         .get(`/api/v1/orders/${orderId}`)
@@ -261,9 +254,7 @@ describe('Reviews API (PRD R系列)', () => {
 
     it('应该拒绝重复确认', async () => {
       // 第一次确认
-      await request(app)
-        .post(`/api/v1/reviews/${reviewId}/approve`)
-        .send({ token: reviewToken })
+      await request(app).post(`/api/v1/reviews/${reviewId}/approve`).send({ token: reviewToken })
 
       // 第二次确认
       const res = await request(app)
@@ -305,12 +296,10 @@ describe('Reviews API (PRD R系列)', () => {
 
     it('应该限制修改次数 (PRD R-01 最多2次)', async () => {
       // 第一次修改
-      await request(app)
-        .post(`/api/v1/reviews/${reviewId}/revision`)
-        .send({
-          token: reviewToken,
-          request_content: '第一次修改'
-        })
+      await request(app).post(`/api/v1/reviews/${reviewId}/revision`).send({
+        token: reviewToken,
+        request_content: '第一次修改'
+      })
 
       // 毛娘回复第一次修改
       const reviewRes = await request(app)
@@ -327,12 +316,10 @@ describe('Reviews API (PRD R系列)', () => {
         })
 
       // 第二次修改
-      await request(app)
-        .post(`/api/v1/reviews/${reviewId}/revision`)
-        .send({
-          token: reviewToken,
-          request_content: '第二次修改'
-        })
+      await request(app).post(`/api/v1/reviews/${reviewId}/revision`).send({
+        token: reviewToken,
+        request_content: '第二次修改'
+      })
 
       // 毛娘回复第二次修改
       const reviewRes2 = await request(app)
@@ -349,12 +336,10 @@ describe('Reviews API (PRD R系列)', () => {
         })
 
       // 第三次修改应该被拒绝
-      const res = await request(app)
-        .post(`/api/v1/reviews/${reviewId}/revision`)
-        .send({
-          token: reviewToken,
-          request_content: '第三次修改'
-        })
+      const res = await request(app).post(`/api/v1/reviews/${reviewId}/revision`).send({
+        token: reviewToken,
+        request_content: '第三次修改'
+      })
 
       expect(res.body.code).toBe(3003)
       expect(res.body.message).toContain('用完')
@@ -362,28 +347,22 @@ describe('Reviews API (PRD R系列)', () => {
 
     it('应该拒绝已确认满意后的修改申请', async () => {
       // 先确认满意
-      await request(app)
-        .post(`/api/v1/reviews/${reviewId}/approve`)
-        .send({ token: reviewToken })
+      await request(app).post(`/api/v1/reviews/${reviewId}/approve`).send({ token: reviewToken })
 
       // 尝试申请修改
-      const res = await request(app)
-        .post(`/api/v1/reviews/${reviewId}/revision`)
-        .send({
-          token: reviewToken,
-          request_content: '想修改'
-        })
+      const res = await request(app).post(`/api/v1/reviews/${reviewId}/revision`).send({
+        token: reviewToken,
+        request_content: '想修改'
+      })
 
       expect(res.body.code).toBe(3002)
     })
 
     it('应该拒绝空的修改意见', async () => {
-      const res = await request(app)
-        .post(`/api/v1/reviews/${reviewId}/revision`)
-        .send({
-          token: reviewToken,
-          request_content: ''
-        })
+      const res = await request(app).post(`/api/v1/reviews/${reviewId}/revision`).send({
+        token: reviewToken,
+        request_content: ''
+      })
 
       expect(res.body.code).toBe(1001)
     })
@@ -406,12 +385,10 @@ describe('Reviews API (PRD R系列)', () => {
       reviewToken = createRes.body.data.review_token
 
       // 客户申请修改
-      await request(app)
-        .post(`/api/v1/reviews/${reviewId}/revision`)
-        .send({
-          token: reviewToken,
-          request_content: '刘海再短一点'
-        })
+      await request(app).post(`/api/v1/reviews/${reviewId}/revision`).send({
+        token: reviewToken,
+        request_content: '刘海再短一点'
+      })
 
       // 获取修改记录ID
       const reviewRes = await request(app)
@@ -445,8 +422,7 @@ describe('Reviews API (PRD R系列)', () => {
         })
 
       // 客户查看验收页
-      const res = await request(app)
-        .get(`/api/v1/reviews/token/${reviewToken}`)
+      const res = await request(app).get(`/api/v1/reviews/token/${reviewToken}`)
 
       expect(res.body.data.images).toContain('https://example.com/new_finished.jpg')
     })
@@ -509,12 +485,10 @@ describe('Reviews API (PRD R系列)', () => {
       const reviewToken = createRes.body.data.review_token
 
       // 2. 客户申请修改
-      const revisionRes = await request(app)
-        .post(`/api/v1/reviews/${reviewId}/revision`)
-        .send({
-          token: reviewToken,
-          request_content: '刘海短一点'
-        })
+      const revisionRes = await request(app).post(`/api/v1/reviews/${reviewId}/revision`).send({
+        token: reviewToken,
+        request_content: '刘海短一点'
+      })
       expect(revisionRes.body.data.revision_number).toBe(1)
 
       // 3. 获取修改记录ID

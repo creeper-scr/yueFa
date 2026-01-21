@@ -42,7 +42,7 @@ export const useUserStore = defineStore('user', () => {
       if (res.code === 0) {
         setUser(res.data)
       }
-    } catch (error) {
+    } catch (_error) {
       logout()
     }
   }

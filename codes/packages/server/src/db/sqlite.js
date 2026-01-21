@@ -256,18 +256,18 @@ const createTables = () => {
   `)
 
   // 创建索引
-  db.run(`CREATE INDEX IF NOT EXISTS idx_users_phone ON users(phone)`)
-  db.run(`CREATE INDEX IF NOT EXISTS idx_users_slug ON users(slug)`)
-  db.run(`CREATE INDEX IF NOT EXISTS idx_works_user_id ON works(user_id)`)
-  db.run(`CREATE INDEX IF NOT EXISTS idx_inquiries_user_id ON inquiries(user_id)`)
-  db.run(`CREATE INDEX IF NOT EXISTS idx_inquiries_status ON inquiries(status)`)
-  db.run(`CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(user_id)`)
-  db.run(`CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status)`)
-  db.run(`CREATE INDEX IF NOT EXISTS idx_orders_deadline ON orders(deadline)`)
-  db.run(`CREATE INDEX IF NOT EXISTS idx_sms_codes_phone ON sms_codes(phone)`)
-  db.run(`CREATE INDEX IF NOT EXISTS idx_reviews_order_id ON reviews(order_id)`)
-  db.run(`CREATE INDEX IF NOT EXISTS idx_reviews_token ON reviews(review_token)`)
-  db.run(`CREATE INDEX IF NOT EXISTS idx_revisions_review_id ON review_revisions(review_id)`)
+  db.run('CREATE INDEX IF NOT EXISTS idx_users_phone ON users(phone)')
+  db.run('CREATE INDEX IF NOT EXISTS idx_users_slug ON users(slug)')
+  db.run('CREATE INDEX IF NOT EXISTS idx_works_user_id ON works(user_id)')
+  db.run('CREATE INDEX IF NOT EXISTS idx_inquiries_user_id ON inquiries(user_id)')
+  db.run('CREATE INDEX IF NOT EXISTS idx_inquiries_status ON inquiries(status)')
+  db.run('CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(user_id)')
+  db.run('CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status)')
+  db.run('CREATE INDEX IF NOT EXISTS idx_orders_deadline ON orders(deadline)')
+  db.run('CREATE INDEX IF NOT EXISTS idx_sms_codes_phone ON sms_codes(phone)')
+  db.run('CREATE INDEX IF NOT EXISTS idx_reviews_order_id ON reviews(order_id)')
+  db.run('CREATE INDEX IF NOT EXISTS idx_reviews_token ON reviews(review_token)')
+  db.run('CREATE INDEX IF NOT EXISTS idx_revisions_review_id ON review_revisions(review_id)')
 }
 
 export default { initDb, getDb, saveDb, runQuery, selectQuery, selectOne }

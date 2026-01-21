@@ -20,7 +20,9 @@ router.get('/', auth, async (req, res, next) => {
 })
 
 // 创建新作品
-router.post('/', auth,
+router.post(
+  '/',
+  auth,
   body('image_url').notEmpty().withMessage('作品图片不能为空'),
   async (req, res, next) => {
     try {

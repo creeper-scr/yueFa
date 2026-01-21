@@ -1,4 +1,4 @@
-import { selectOne, selectQuery, runQuery, saveDb } from './index.js'
+import { selectOne, selectQuery, runQuery } from './index.js'
 import { v4 as uuidv4 } from 'uuid'
 
 export const WorkModel = {
@@ -14,13 +14,16 @@ export const WorkModel = {
 
   // 获取用户的作品列表
   findByUserId(userId) {
-    const rows = selectQuery(`
+    const rows = selectQuery(
+      `
       SELECT * FROM works
       WHERE user_id = ? AND status = 1
       ORDER BY sort_order ASC, created_at DESC
-    `, [userId])
+    `,
+      [userId]
+    )
 
-    return rows.map(row => ({
+    return rows.map((row) => ({
       ...row,
       tags: row.tags ? JSON.parse(row.tags) : []
     }))
@@ -32,11 +35,23 @@ export const WorkModel = {
     const tags = data.tags ? JSON.stringify(data.tags) : null
     const now = new Date().toISOString()
 
-    runQuery(`
+    runQuery(
+      `
       INSERT INTO works (id, user_id, image_url, thumbnail_url, title, source_work, tags, sort_order, created_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `, [id, data.user_id, data.image_url, data.thumbnail_url || null,
-        data.title || null, data.source_work || null, tags, data.sort_order || 0, now])
+    `,
+      [
+        id,
+        data.user_id,
+        data.image_url,
+        data.thumbnail_url || null,
+        data.title || null,
+        data.source_work || null,
+        tags,
+        data.sort_order || 0,
+        now
+      ]
+    )
 
     return this.findById(id)
   },
@@ -76,7 +91,11 @@ export const WorkModel = {
   // 批量更新排序
   updateSortOrder(userId, orderList) {
     for (const { id, sort_order } of orderList) {
-      runQuery('UPDATE works SET sort_order = ? WHERE id = ? AND user_id = ?', [sort_order, id, userId])
+      runQuery('UPDATE works SET sort_order = ? WHERE id = ? AND user_id = ?', [
+        sort_order,
+        id,
+        userId
+      ])
     }
     return true
   }

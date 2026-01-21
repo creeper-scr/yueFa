@@ -34,8 +34,13 @@ router.get('/profile', auth, async (req, res, next) => {
 })
 
 // 更新用户信息
-router.put('/profile', auth,
-  body('slug').optional().isLength({ min: 3, max: 50 }).matches(/^[a-zA-Z0-9_-]+$/)
+router.put(
+  '/profile',
+  auth,
+  body('slug')
+    .optional()
+    .isLength({ min: 3, max: 50 })
+    .matches(/^[a-zA-Z0-9_-]+$/)
     .withMessage('专属链接只能包含字母、数字、下划线和横线，长度3-50'),
   body('nickname').optional().isLength({ max: 50 }).withMessage('昵称长度不能超过50'),
   body('wechat_id').optional().isLength({ max: 50 }).withMessage('微信号长度不能超过50'),

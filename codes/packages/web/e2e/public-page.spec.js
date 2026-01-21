@@ -170,8 +170,8 @@ test.describe('公开主页 - 错误处理', () => {
         contentType: 'application/json',
         body: JSON.stringify({
           code: 1,
-          message: '用户不存在',
-        }),
+          message: '用户不存在'
+        })
       })
     })
 

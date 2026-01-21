@@ -129,5 +129,5 @@ export default {
   selectQuery,
   selectOne,
   closeDb,
-  getDbType,
+  getDbType
 }

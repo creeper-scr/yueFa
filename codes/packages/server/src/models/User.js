@@ -1,4 +1,4 @@
-import { selectOne, selectQuery, runQuery, saveDb } from './index.js'
+import { selectOne, runQuery } from './index.js'
 import { v4 as uuidv4 } from 'uuid'
 
 export const UserModel = {
@@ -21,11 +21,23 @@ export const UserModel = {
   create(data) {
     const id = uuidv4()
     const now = new Date().toISOString()
-    runQuery(`
+    runQuery(
+      `
       INSERT INTO users (id, phone, nickname, avatar_url, wechat_id, announcement, slug, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `, [id, data.phone, data.nickname || null, data.avatar_url || null,
-        data.wechat_id || null, data.announcement || null, data.slug || null, now, now])
+    `,
+      [
+        id,
+        data.phone,
+        data.nickname || null,
+        data.avatar_url || null,
+        data.wechat_id || null,
+        data.announcement || null,
+        data.slug || null,
+        now,
+        now
+      ]
+    )
     return this.findById(id)
   },
 

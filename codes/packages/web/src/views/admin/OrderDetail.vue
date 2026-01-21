@@ -11,8 +11,12 @@
           <van-icon :name="statusIcon" size="32" />
         </div>
         <div class="status-info">
-          <div class="status-label">{{ statusLabel }}</div>
-          <div class="status-desc">{{ statusDesc }}</div>
+          <div class="status-label">
+            {{ statusLabel }}
+          </div>
+          <div class="status-desc">
+            {{ statusDesc }}
+          </div>
         </div>
         <!-- 死线提醒 -->
         <div v-if="deadlineDays !== null" :class="['deadline-badge', deadlineClass]">
@@ -23,7 +27,12 @@
       <!-- 客户信息 -->
       <van-cell-group inset title="客户信息">
         <van-cell title="客户称呼" :value="order.customer_name || '-'" />
-        <van-cell title="联系方式" :value="order.customer_contact || '-'" is-link @click="copyContact" />
+        <van-cell
+          title="联系方式"
+          :value="order.customer_contact || '-'"
+          is-link
+          @click="copyContact"
+        />
         <van-cell title="头围" :value="order.head_circumference || '-'" />
         <van-cell v-if="order.head_notes" title="头型备注" :value="order.head_notes" />
       </van-cell-group>
@@ -37,15 +46,43 @@
         <van-cell title="定金(20%)">
           <template #value>
             <span>¥{{ order.deposit || 0 }}</span>
-            <van-tag v-if="order.deposit_paid_at" type="success" size="small" class="pay-tag">已付</van-tag>
-            <van-tag v-else type="warning" size="small" class="pay-tag">待付</van-tag>
+            <van-tag
+              v-if="order.deposit_paid_at"
+              type="success"
+              size="small"
+              class="pay-tag"
+            >
+              已付
+            </van-tag>
+            <van-tag
+              v-else
+              type="warning"
+              size="small"
+              class="pay-tag"
+            >
+              待付
+            </van-tag>
           </template>
         </van-cell>
         <van-cell title="尾款(80%)">
           <template #value>
             <span>¥{{ order.balance || 0 }}</span>
-            <van-tag v-if="order.balance_paid_at" type="success" size="small" class="pay-tag">已付</van-tag>
-            <van-tag v-else type="warning" size="small" class="pay-tag">待付</van-tag>
+            <van-tag
+              v-if="order.balance_paid_at"
+              type="success"
+              size="small"
+              class="pay-tag"
+            >
+              已付
+            </van-tag>
+            <van-tag
+              v-else
+              type="warning"
+              size="small"
+              class="pay-tag"
+            >
+              待付
+            </van-tag>
           </template>
         </van-cell>
       </van-cell-group>
@@ -55,8 +92,12 @@
         <van-cell title="毛坯来源" :value="order.wig_source === 'stylist_buys' ? '毛娘代购' : '客户寄送'" />
         <van-cell v-if="order.wig_source === 'client_sends'" title="毛坯状态">
           <template #value>
-            <van-tag v-if="order.wig_received_at" type="success">已收到</van-tag>
-            <van-tag v-else type="warning">等待中</van-tag>
+            <van-tag v-if="order.wig_received_at" type="success">
+              已收到
+            </van-tag>
+            <van-tag v-else type="warning">
+              等待中
+            </van-tag>
           </template>
         </van-cell>
         <van-cell v-if="order.wig_tracking_no" title="快递单号" :value="order.wig_tracking_no" />
@@ -74,8 +115,12 @@
       <van-cell-group inset title="验收信息">
         <van-cell v-if="review" title="验收状态">
           <template #value>
-            <van-tag v-if="review.is_approved" type="success">已通过</van-tag>
-            <van-tag v-else type="primary">等待确认</van-tag>
+            <van-tag v-if="review.is_approved" type="success">
+              已通过
+            </van-tag>
+            <van-tag v-else type="primary">
+              等待确认
+            </van-tag>
           </template>
         </van-cell>
         <van-cell v-if="review" title="修改次数" :value="`${review.revision_count}/${review.max_revisions}`" />
@@ -90,7 +135,7 @@
       </van-cell-group>
 
       <!-- 人设图 -->
-      <van-cell-group inset title="人设图" v-if="order.reference_images?.length">
+      <van-cell-group v-if="order.reference_images?.length" inset title="人设图">
         <div class="reference-images">
           <van-image
             v-for="(img, index) in order.reference_images"
@@ -105,16 +150,22 @@
       </van-cell-group>
 
       <!-- 特殊要求 -->
-      <van-cell-group inset title="特殊要求" v-if="order.special_requirements">
-        <div class="requirements">{{ order.special_requirements }}</div>
+      <van-cell-group v-if="order.special_requirements" inset title="特殊要求">
+        <div class="requirements">
+          {{ order.special_requirements }}
+        </div>
       </van-cell-group>
 
       <!-- 备注记录 -->
       <van-cell-group inset title="备注记录">
-        <div class="notes-list" v-if="order.notes?.length">
+        <div v-if="order.notes?.length" class="notes-list">
           <div v-for="note in order.notes" :key="note.id" class="note-item">
-            <div class="note-content">{{ note.content }}</div>
-            <div class="note-time">{{ formatTime(note.created_at) }}</div>
+            <div class="note-content">
+              {{ note.content }}
+            </div>
+            <div class="note-time">
+              {{ formatTime(note.created_at) }}
+            </div>
           </div>
         </div>
         <van-empty v-else description="暂无备注" :image-size="60" />
@@ -127,7 +178,12 @@
             autosize
           >
             <template #button>
-              <van-button size="small" type="primary" @click="addNote" :loading="addingNote">
+              <van-button
+                size="small"
+                type="primary"
+                :loading="addingNote"
+                @click="addNote"
+              >
                 添加
               </van-button>
             </template>
@@ -136,7 +192,7 @@
       </van-cell-group>
 
       <!-- 操作按钮 -->
-      <div class="action-bar" v-if="actions.length > 0">
+      <div v-if="actions.length > 0" class="action-bar">
         <van-button
           v-for="action in actions"
           :key="action.key"
@@ -275,7 +331,7 @@ const fetchOrder = async () => {
     if (reviewRes.code === 0 && reviewRes.data) {
       review.value = reviewRes.data
     }
-  } catch (error) {
+  } catch (_error) {
     showToast('加载失败')
   } finally {
     loading.value = false
@@ -311,8 +367,8 @@ const addNote = async () => {
       newNote.value = ''
       showSuccessToast('备注已添加')
     }
-  } catch (error) {
-    showToast(error.message || '添加失败')
+  } catch (_error) {
+    showToast('添加失败')
   } finally {
     addingNote.value = false
   }
@@ -393,8 +449,8 @@ const updateStatus = async (status) => {
     await ordersApi.updateStatus(orderId, status)
     showSuccessToast('状态已更新')
     fetchOrder()
-  } catch (error) {
-    showFailToast(error.message || '更新失败')
+  } catch (_error) {
+    showFailToast('更新失败')
   }
 }
 

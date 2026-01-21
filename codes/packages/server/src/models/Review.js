@@ -52,17 +52,27 @@ export const ReviewModel = {
     const baseUrl = process.env.BASE_URL || 'http://localhost:5173'
     const reviewUrl = `${baseUrl}/review/${token}`
 
-    runQuery(`
+    runQuery(
+      `
       INSERT INTO reviews (
         id, order_id, images, description, review_token, review_url,
         max_revisions, revision_count, created_at, updated_at
       )
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `, [
-      id, data.order_id, images, data.description || null,
-      token, reviewUrl,
-      data.max_revisions || 2, 0, now, now
-    ])
+    `,
+      [
+        id,
+        data.order_id,
+        images,
+        data.description || null,
+        token,
+        reviewUrl,
+        data.max_revisions || 2,
+        0,
+        now,
+        now
+      ]
+    )
 
     return this.findById(id)
   },
@@ -100,11 +110,14 @@ export const ReviewModel = {
   approve(id) {
     const now = new Date().toISOString()
 
-    runQuery(`
+    runQuery(
+      `
       UPDATE reviews
       SET is_approved = 1, approved_at = ?, updated_at = ?
       WHERE id = ?
-    `, [now, now, id])
+    `,
+      [now, now, id]
+    )
 
     return this.findById(id)
   },
@@ -117,11 +130,14 @@ export const ReviewModel = {
     const newCount = (review.revision_count || 0) + 1
     const now = new Date().toISOString()
 
-    runQuery(`
+    runQuery(
+      `
       UPDATE reviews
       SET revision_count = ?, updated_at = ?
       WHERE id = ?
-    `, [newCount, now, id])
+    `,
+      [newCount, now, id]
+    )
 
     return this.findById(id)
   },
@@ -147,13 +163,16 @@ export const ReviewRevisionModel = {
 
   // 获取验收的所有修改记录
   findByReviewId(reviewId) {
-    const rows = selectQuery(`
+    const rows = selectQuery(
+      `
       SELECT * FROM review_revisions
       WHERE review_id = ?
       ORDER BY revision_number ASC
-    `, [reviewId])
+    `,
+      [reviewId]
+    )
 
-    return rows.map(row => this._parseRevision(row))
+    return rows.map((row) => this._parseRevision(row))
   },
 
   // 解析修改记录
@@ -172,15 +191,15 @@ export const ReviewRevisionModel = {
     const requestImages = data.request_images ? JSON.stringify(data.request_images) : null
     const now = new Date().toISOString()
 
-    runQuery(`
+    runQuery(
+      `
       INSERT INTO review_revisions (
         id, review_id, revision_number, request_content, request_images, requested_at
       )
       VALUES (?, ?, ?, ?, ?, ?)
-    `, [
-      id, data.review_id, data.revision_number,
-      data.request_content, requestImages, now
-    ])
+    `,
+      [id, data.review_id, data.revision_number, data.request_content, requestImages, now]
+    )
 
     return this.findById(id)
   },
@@ -190,11 +209,14 @@ export const ReviewRevisionModel = {
     const responseImages = data.response_images ? JSON.stringify(data.response_images) : null
     const now = new Date().toISOString()
 
-    runQuery(`
+    runQuery(
+      `
       UPDATE review_revisions
       SET response_images = ?, response_notes = ?, completed_at = ?
       WHERE id = ?
-    `, [responseImages, data.response_notes || null, now, id])
+    `,
+      [responseImages, data.response_notes || null, now, id]
+    )
 
     return this.findById(id)
   },
@@ -203,23 +225,29 @@ export const ReviewRevisionModel = {
   confirmSatisfaction(id, isSatisfied) {
     const now = new Date().toISOString()
 
-    runQuery(`
+    runQuery(
+      `
       UPDATE review_revisions
       SET is_satisfied = ?, confirmed_at = ?
       WHERE id = ?
-    `, [isSatisfied ? 1 : 0, now, id])
+    `,
+      [isSatisfied ? 1 : 0, now, id]
+    )
 
     return this.findById(id)
   },
 
   // 获取待处理的修改请求 (毛娘还未回复的)
   getPendingByReviewId(reviewId) {
-    const row = selectOne(`
+    const row = selectOne(
+      `
       SELECT * FROM review_revisions
       WHERE review_id = ? AND completed_at IS NULL
       ORDER BY revision_number DESC
       LIMIT 1
-    `, [reviewId])
+    `,
+      [reviewId]
+    )
 
     if (!row) return null
     return this._parseRevision(row)

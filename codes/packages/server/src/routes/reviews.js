@@ -8,7 +8,9 @@ import { AppError } from '../middleware/errorHandler.js'
 const router = express.Router()
 
 // 创建验收记录 (毛娘上传成品图 PRD R-01)
-router.post('/', auth,
+router.post(
+  '/',
+  auth,
   body('order_id').notEmpty().withMessage('订单ID不能为空'),
   body('images').isArray({ min: 1 }).withMessage('至少需要上传一张成品图'),
   body('description').optional().isString(),
@@ -133,7 +135,7 @@ router.get('/token/:token', async (req, res, next) => {
         max_revisions: review.max_revisions,
         is_approved: review.is_approved,
         approved_at: review.approved_at,
-        revisions: revisions.map(r => ({
+        revisions: revisions.map((r) => ({
           revision_number: r.revision_number,
           request_content: r.request_content,
           request_images: r.request_images,
@@ -151,7 +153,8 @@ router.get('/token/:token', async (req, res, next) => {
 })
 
 // 客户确认满意 (PRD R-01)
-router.post('/:id/approve',
+router.post(
+  '/:id/approve',
   body('token').notEmpty().withMessage('验证token不能为空'),
   async (req, res, next) => {
     try {
@@ -198,7 +201,8 @@ router.post('/:id/approve',
 )
 
 // 客户申请修改 (PRD R-02)
-router.post('/:id/revision',
+router.post(
+  '/:id/revision',
   body('token').notEmpty().withMessage('验证token不能为空'),
   body('request_content').notEmpty().withMessage('修改意见不能为空'),
   body('request_images').optional().isArray(),
@@ -264,7 +268,9 @@ router.post('/:id/revision',
 )
 
 // 毛娘提交修改结果
-router.put('/:id/revision/:revisionId', auth,
+router.put(
+  '/:id/revision/:revisionId',
+  auth,
   body('response_images').isArray({ min: 1 }).withMessage('请上传修改后的图片'),
   body('response_notes').optional().isString(),
   async (req, res, next) => {

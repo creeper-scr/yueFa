@@ -83,18 +83,14 @@ describe('Users API', () => {
 
   describe('GET /api/v1/users/:slug', () => {
     beforeEach(async () => {
-      await request(app)
-        .put('/api/v1/users/profile')
-        .set('Authorization', `Bearer ${token}`)
-        .send({
-          nickname: '公开毛娘',
-          slug: 'public_shop'
-        })
+      await request(app).put('/api/v1/users/profile').set('Authorization', `Bearer ${token}`).send({
+        nickname: '公开毛娘',
+        slug: 'public_shop'
+      })
     })
 
     it('应该返回公开主页信息', async () => {
-      const res = await request(app)
-        .get('/api/v1/users/public_shop')
+      const res = await request(app).get('/api/v1/users/public_shop')
 
       expect(res.status).toBe(200)
       expect(res.body.code).toBe(0)
@@ -103,8 +99,7 @@ describe('Users API', () => {
     })
 
     it('应该返回404对于不存在的slug', async () => {
-      const res = await request(app)
-        .get('/api/v1/users/nonexistent')
+      const res = await request(app).get('/api/v1/users/nonexistent')
 
       expect(res.body.code).toBe(3001)
     })

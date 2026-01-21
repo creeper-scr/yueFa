@@ -5,7 +5,7 @@
 
     <!-- 瀑布流布局 -->
     <div v-else class="gallery-container">
-      <div class="gallery-column" v-for="(column, index) in columns" :key="index">
+      <div v-for="(column, index) in columns" :key="index" class="gallery-column">
         <div
           v-for="work in column"
           :key="work.id"
@@ -22,14 +22,20 @@
               <van-loading type="spinner" size="20" />
             </template>
             <template #error>
-              <div class="image-error">加载失败</div>
+              <div class="image-error">
+                加载失败
+              </div>
             </template>
           </van-image>
-          <div class="work-info" v-if="work.title || work.source_work">
-            <div class="work-title" v-if="work.title">{{ work.title }}</div>
-            <div class="work-source" v-if="work.source_work">{{ work.source_work }}</div>
+          <div v-if="work.title || work.source_work" class="work-info">
+            <div v-if="work.title" class="work-title">
+              {{ work.title }}
+            </div>
+            <div v-if="work.source_work" class="work-source">
+              {{ work.source_work }}
+            </div>
           </div>
-          <div class="work-tags" v-if="work.tags && work.tags.length > 0">
+          <div v-if="work.tags && work.tags.length > 0" class="work-tags">
             <van-tag
               v-for="tag in work.tags.slice(0, 3)"
               :key="tag"

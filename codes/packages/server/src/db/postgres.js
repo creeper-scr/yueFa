@@ -16,12 +16,10 @@ export const getPool = () => {
   if (connectionString) {
     pool = new Pool({
       connectionString,
-      ssl: process.env.NODE_ENV === 'production'
-        ? { rejectUnauthorized: false }
-        : false,
+      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
       max: 10,
       idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 5000,
+      connectionTimeoutMillis: 5000
     })
   } else {
     pool = new Pool({
@@ -32,7 +30,7 @@ export const getPool = () => {
       password: process.env.DB_PASSWORD || '',
       max: 10,
       idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 5000,
+      connectionTimeoutMillis: 5000
     })
   }
 
@@ -82,16 +80,12 @@ const runMigrations = async (pool) => {
     `)
 
     // 检查是否需要运行初始迁移
-    const result = await client.query(
-      "SELECT name FROM migrations WHERE name = '001_init'"
-    )
+    const result = await client.query('SELECT name FROM migrations WHERE name = \'001_init\'')
 
     if (result.rows.length === 0) {
       console.log('Running initial migration...')
       await runInitialMigration(client)
-      await client.query(
-        "INSERT INTO migrations (name) VALUES ('001_init')"
-      )
+      await client.query('INSERT INTO migrations (name) VALUES (\'001_init\')')
       console.log('Initial migration completed')
     }
   } finally {
@@ -254,18 +248,20 @@ const runInitialMigration = async (client) => {
   `)
 
   // 创建索引
-  await client.query(`CREATE INDEX IF NOT EXISTS idx_users_phone ON users(phone)`)
-  await client.query(`CREATE INDEX IF NOT EXISTS idx_users_slug ON users(slug)`)
-  await client.query(`CREATE INDEX IF NOT EXISTS idx_works_user_id ON works(user_id)`)
-  await client.query(`CREATE INDEX IF NOT EXISTS idx_inquiries_user_id ON inquiries(user_id)`)
-  await client.query(`CREATE INDEX IF NOT EXISTS idx_inquiries_status ON inquiries(status)`)
-  await client.query(`CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(user_id)`)
-  await client.query(`CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status)`)
-  await client.query(`CREATE INDEX IF NOT EXISTS idx_orders_deadline ON orders(deadline)`)
-  await client.query(`CREATE INDEX IF NOT EXISTS idx_sms_codes_phone ON sms_codes(phone)`)
-  await client.query(`CREATE INDEX IF NOT EXISTS idx_reviews_order_id ON reviews(order_id)`)
-  await client.query(`CREATE INDEX IF NOT EXISTS idx_reviews_token ON reviews(review_token)`)
-  await client.query(`CREATE INDEX IF NOT EXISTS idx_revisions_review_id ON review_revisions(review_id)`)
+  await client.query('CREATE INDEX IF NOT EXISTS idx_users_phone ON users(phone)')
+  await client.query('CREATE INDEX IF NOT EXISTS idx_users_slug ON users(slug)')
+  await client.query('CREATE INDEX IF NOT EXISTS idx_works_user_id ON works(user_id)')
+  await client.query('CREATE INDEX IF NOT EXISTS idx_inquiries_user_id ON inquiries(user_id)')
+  await client.query('CREATE INDEX IF NOT EXISTS idx_inquiries_status ON inquiries(status)')
+  await client.query('CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(user_id)')
+  await client.query('CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status)')
+  await client.query('CREATE INDEX IF NOT EXISTS idx_orders_deadline ON orders(deadline)')
+  await client.query('CREATE INDEX IF NOT EXISTS idx_sms_codes_phone ON sms_codes(phone)')
+  await client.query('CREATE INDEX IF NOT EXISTS idx_reviews_order_id ON reviews(order_id)')
+  await client.query('CREATE INDEX IF NOT EXISTS idx_reviews_token ON reviews(review_token)')
+  await client.query(
+    'CREATE INDEX IF NOT EXISTS idx_revisions_review_id ON review_revisions(review_id)'
+  )
 }
 
 /**
@@ -311,8 +307,12 @@ export const closePool = async () => {
 export const getDb = () => {
   return {
     run: async (sql, params) => runQuery(sql, params),
-    prepare: () => { throw new Error('prepare() not supported in PostgreSQL mode') },
-    export: () => { throw new Error('export() not supported in PostgreSQL mode') },
+    prepare: () => {
+      throw new Error('prepare() not supported in PostgreSQL mode')
+    },
+    export: () => {
+      throw new Error('export() not supported in PostgreSQL mode')
+    }
   }
 }
 
@@ -328,5 +328,5 @@ export default {
   runQuery,
   selectQuery,
   selectOne,
-  closePool,
+  closePool
 }

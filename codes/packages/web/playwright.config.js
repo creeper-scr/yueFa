@@ -31,20 +31,20 @@ export default defineConfig({
     // 截图
     screenshot: 'only-on-failure',
     // 视频
-    video: 'retain-on-failure',
+    video: 'retain-on-failure'
   },
 
   // 配置项目 - 只使用 Chromium
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: { ...devices['Desktop Chrome'] }
     },
     // Mobile Chrome
     {
       name: 'Mobile Chrome',
-      use: { ...devices['Pixel 5'] },
-    },
+      use: { ...devices['Pixel 5'] }
+    }
   ],
 
   // 启动开发服务器（前端和后端）
@@ -58,14 +58,14 @@ export default defineConfig({
       env: {
         NODE_ENV: 'test',
         JWT_SECRET: process.env.JWT_SECRET || 'test_jwt_secret',
-        PORT: '4000',
-      },
+        PORT: '4000'
+      }
     },
     {
       command: 'pnpm dev',
       url: 'http://localhost:3000',
       reuseExistingServer: !process.env.CI,
-      timeout: 120 * 1000,
-    },
-  ],
+      timeout: 120 * 1000
+    }
+  ]
 })

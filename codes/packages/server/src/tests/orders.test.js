@@ -5,8 +5,8 @@ import { SmsCodeModel } from '../models/SmsCode.js'
 import { ORDER_STATUS } from '../models/Order.js'
 
 describe('Orders API', () => {
-  const testPhone = '13800138001'  // 唯一手机号，避免与其他测试冲突
-  const testSlug = 'test_orders_user'  // 唯一 slug
+  const testPhone = '13800138001' // 唯一手机号，避免与其他测试冲突
+  const testSlug = 'test_orders_user' // 唯一 slug
   let token
   let inquiryId
   let orderId
@@ -26,19 +26,17 @@ describe('Orders API', () => {
       .send({ slug: testSlug })
 
     // 创建询价 (PRD F-01 - 包含毛坯来源)
-    const inquiryRes = await request(app)
-      .post('/api/v1/inquiries')
-      .send({
-        user_slug: testSlug,
-        customer_name: '测试客户',
-        customer_contact: 'wx: test',
-        character_name: '胡桃',
-        source_work: '原神',
-        budget_range: '400-600',
-        wig_source: 'client_sends',  // PRD F-03
-        head_circumference: '56cm',
-        head_notes: '头型偏扁'
-      })
+    const inquiryRes = await request(app).post('/api/v1/inquiries').send({
+      user_slug: testSlug,
+      customer_name: '测试客户',
+      customer_contact: 'wx: test',
+      character_name: '胡桃',
+      source_work: '原神',
+      budget_range: '400-600',
+      wig_source: 'client_sends', // PRD F-03
+      head_circumference: '56cm',
+      head_notes: '头型偏扁'
+    })
     inquiryId = inquiryRes.body.data.id
 
     // 转为订单
@@ -51,9 +49,7 @@ describe('Orders API', () => {
 
   describe('GET /api/v1/orders', () => {
     it('应该返回订单列表', async () => {
-      const res = await request(app)
-        .get('/api/v1/orders')
-        .set('Authorization', `Bearer ${token}`)
+      const res = await request(app).get('/api/v1/orders').set('Authorization', `Bearer ${token}`)
 
       expect(res.status).toBe(200)
       expect(res.body.code).toBe(0)
@@ -70,9 +66,7 @@ describe('Orders API', () => {
     })
 
     it('应该返回所有9种状态的计数', async () => {
-      const res = await request(app)
-        .get('/api/v1/orders')
-        .set('Authorization', `Bearer ${token}`)
+      const res = await request(app).get('/api/v1/orders').set('Authorization', `Bearer ${token}`)
 
       const statusCount = res.body.data.statusCount
       expect(statusCount).toHaveProperty('pending_quote')
@@ -88,9 +82,7 @@ describe('Orders API', () => {
     })
 
     it('应该返回死线预警列表', async () => {
-      const res = await request(app)
-        .get('/api/v1/orders')
-        .set('Authorization', `Bearer ${token}`)
+      const res = await request(app).get('/api/v1/orders').set('Authorization', `Bearer ${token}`)
 
       expect(res.body.data.deadlineAlerts).toBeDefined()
       expect(Array.isArray(res.body.data.deadlineAlerts)).toBe(true)
@@ -180,16 +172,14 @@ describe('Orders API', () => {
 
     it('毛娘代购 - 确认定金后状态应该直接变为排单中', async () => {
       // 创建一个毛娘代购的订单
-      const inquiryRes = await request(app)
-        .post('/api/v1/inquiries')
-        .send({
-          user_slug: testSlug,
-          customer_name: '客户2',
-          customer_contact: 'wx: test2',
-          character_name: '甘雨',
-          source_work: '原神',
-          wig_source: 'stylist_buys'  // 毛娘代购
-        })
+      const inquiryRes = await request(app).post('/api/v1/inquiries').send({
+        user_slug: testSlug,
+        customer_name: '客户2',
+        customer_contact: 'wx: test2',
+        character_name: '甘雨',
+        source_work: '原神',
+        wig_source: 'stylist_buys' // 毛娘代购
+      })
 
       const convertRes = await request(app)
         .post(`/api/v1/inquiries/${inquiryRes.body.data.id}/convert`)
@@ -511,8 +501,8 @@ describe('Orders API', () => {
         .send({ price: 1000 })
 
       expect(res.body.data.price).toBe(1000)
-      expect(res.body.data.deposit).toBe(200)  // 1000 * 20%
-      expect(res.body.data.balance).toBe(800)  // 1000 * 80%
+      expect(res.body.data.deposit).toBe(200) // 1000 * 20%
+      expect(res.body.data.balance).toBe(800) // 1000 * 80%
     })
   })
 })

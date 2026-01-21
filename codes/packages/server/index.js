@@ -82,9 +82,8 @@ export const handler = async (event, context) => {
   }
 
   // 构建查询字符串
-  const queryString = Object.keys(queryParams).length > 0
-    ? '?' + new URLSearchParams(queryParams).toString()
-    : ''
+  const queryString =
+    Object.keys(queryParams).length > 0 ? '?' + new URLSearchParams(queryParams).toString() : ''
 
   // 构造 Express 格式的请求对象
   const expressReq = {
@@ -96,7 +95,7 @@ export const handler = async (event, context) => {
     headers,
     body: body || {},
     params: {},
-    get: function(name) {
+    get: function (name) {
       return this.headers[name.toLowerCase()]
     }
   }

@@ -9,23 +9,28 @@
     "test": "vitest",
     "test:coverage": "vitest --coverage",
     "db:init": "node src/scripts/initDb.js",
-    "db:migrate": "node src/db/migrate.js"
+    "db:migrate": "node src/db/migrate.js",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "format": "prettier --write \"src/**/*.js\"",
+    "format:check": "prettier --check \"src/**/*.js\""
   },
   "dependencies": {
-    "express": "^4.19.2",
-    "cors": "^2.8.5",
-    "sql.js": "^1.10.3",
-    "pg": "^8.11.3",
-    "jsonwebtoken": "^9.0.2",
-    "uuid": "^9.0.1",
     "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
     "express-validator": "^7.0.1",
+    "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1",
-    "dotenv": "^16.4.5"
+    "pg": "^8.11.3",
+    "sql.js": "^1.10.3",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
+    "eslint": "^9.39.2",
     "nodemon": "^3.1.0",
-    "vitest": "^1.4.0",
-    "supertest": "^6.3.4"
+    "supertest": "^6.3.4",
+    "vitest": "^1.4.0"
   }
 }

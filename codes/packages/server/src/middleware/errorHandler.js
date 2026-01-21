@@ -1,7 +1,5 @@
 // 统一错误处理中间件
-export const errorHandler = (err, req, res, next) => {
-  console.error('Error:', err)
-
+export const errorHandler = (err, req, res, _next) => {
   // 默认错误
   let statusCode = 500
   let response = {
@@ -14,6 +12,9 @@ export const errorHandler = (err, req, res, next) => {
     statusCode = err.statusCode
     response.code = err.code || statusCode
     response.message = err.message
+    if (err.errors && err.errors.length > 0) {
+      response.errors = err.errors
+    }
   }
 
   // 验证错误
@@ -35,10 +36,11 @@ export const errorHandler = (err, req, res, next) => {
 
 // 业务错误类
 export class AppError extends Error {
-  constructor(code, message, statusCode = 400) {
+  constructor(code, message, statusCode = 400, errors = []) {
     super(message)
     this.code = code
     this.statusCode = statusCode
+    this.errors = errors
     this.name = 'AppError'
   }
 }

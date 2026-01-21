@@ -10,12 +10,19 @@ const router = express.Router()
 const ORDER_STATUSES = Object.values(ORDER_STATUS)
 
 // 获取订单列表 (PRD B-01 升级 - 包含死线预警)
-router.get('/', auth,
+router.get(
+  '/',
+  auth,
   query('status').optional().isIn(ORDER_STATUSES),
   query('page').optional().isInt({ min: 1 }),
   query('limit').optional().isInt({ min: 1, max: 100 }),
   async (req, res, next) => {
     try {
+      const errors = validationResult(req)
+      if (!errors.isEmpty()) {
+        throw new AppError(1001, '数据验证失败', 400, errors.array())
+      }
+
       const { status, page = 1, limit = 20 } = req.query
 
       const orders = OrderModel.findByUserId(req.user.userId, {
@@ -71,11 +78,18 @@ router.get('/:id', auth, async (req, res, next) => {
 })
 
 // 更新订单信息 (PRD 2.0 升级 - 支持新字段)
-router.put('/:id', auth,
+router.put(
+  '/:id',
+  auth,
   body('price').optional().isNumeric(),
   body('deadline').optional().isISO8601(),
   async (req, res, next) => {
     try {
+      const errors = validationResult(req)
+      if (!errors.isEmpty()) {
+        throw new AppError(1001, '数据验证失败', 400, errors.array())
+      }
+
       const { id } = req.params
       const order = OrderModel.findById(id)
 
@@ -126,7 +140,9 @@ router.put('/:id', auth,
 )
 
 // 更新订单状态
-router.put('/:id/status', auth,
+router.put(
+  '/:id/status',
+  auth,
   body('status').isIn(ORDER_STATUSES).withMessage('无效的订单状态'),
   async (req, res, next) => {
     try {
@@ -150,7 +166,10 @@ router.put('/:id/status', auth,
 
       // 验证状态流转是否合法
       if (!OrderModel.isValidStatusTransition(order.status, status)) {
-        throw new AppError(3002, `不能从 ${ORDER_STATUS_TEXT[order.status]} 变更为 ${ORDER_STATUS_TEXT[status]}`)
+        throw new AppError(
+          3002,
+          `不能从 ${ORDER_STATUS_TEXT[order.status]} 变更为 ${ORDER_STATUS_TEXT[status]}`
+        )
       }
 
       const updated = OrderModel.update(id, { status })
@@ -166,10 +185,17 @@ router.put('/:id/status', auth,
 )
 
 // 确认定金 (PRD 流程)
-router.put('/:id/deposit', auth,
+router.put(
+  '/:id/deposit',
+  auth,
   body('screenshot').optional().isString(),
   async (req, res, next) => {
     try {
+      const errors = validationResult(req)
+      if (!errors.isEmpty()) {
+        throw new AppError(1001, '数据验证失败', 400, errors.array())
+      }
+
       const { id } = req.params
       const { screenshot } = req.body
 
@@ -201,7 +227,9 @@ router.put('/:id/deposit', auth,
 )
 
 // 确认毛坯收货 (PRD F-03)
-router.put('/:id/wig-received', auth,
+router.put(
+  '/:id/wig-received',
+  auth,
   body('tracking_no').optional().isString(),
   async (req, res, next) => {
     try {
@@ -236,7 +264,9 @@ router.put('/:id/wig-received', auth,
 )
 
 // 确认尾款 (PRD 流程)
-router.put('/:id/balance', auth,
+router.put(
+  '/:id/balance',
+  auth,
   body('screenshot').optional().isString(),
   async (req, res, next) => {
     try {
@@ -271,7 +301,9 @@ router.put('/:id/balance', auth,
 )
 
 // 发货 (PRD S-01)
-router.put('/:id/ship', auth,
+router.put(
+  '/:id/ship',
+  auth,
   body('shipping_company').optional().isString(),
   body('shipping_no').optional().isString(),
   body('checklist').optional().isObject(),
@@ -344,7 +376,9 @@ router.put('/:id/complete', auth, async (req, res, next) => {
 })
 
 // 添加订单备注
-router.post('/:id/notes', auth,
+router.post(
+  '/:id/notes',
+  auth,
   body('content').notEmpty().withMessage('备注内容不能为空'),
   async (req, res, next) => {
     try {

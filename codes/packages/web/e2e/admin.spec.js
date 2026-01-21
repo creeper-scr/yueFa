@@ -69,8 +69,8 @@ test.describe('个人资料编辑页面', () => {
           contentType: 'application/json',
           body: JSON.stringify({
             code: 0,
-            data: mockData.user,
-          }),
+            data: mockData.user
+          })
         })
       } else if (route.request().method() === 'PUT') {
         await route.fulfill({
@@ -79,8 +79,8 @@ test.describe('个人资料编辑页面', () => {
           body: JSON.stringify({
             code: 0,
             message: '保存成功',
-            data: { ...mockData.user, ...route.request().postDataJSON() },
-          }),
+            data: { ...mockData.user, ...route.request().postDataJSON() }
+          })
         })
       } else {
         await route.continue()
@@ -198,9 +198,9 @@ test.describe('底部导航', () => {
     await page.goto('/admin/orders')
 
     // 订单Tab应该高亮
-    await expect(
-      page.locator('.van-tabbar-item').filter({ hasText: '订单' })
-    ).toHaveClass(/van-tabbar-item--active/)
+    await expect(page.locator('.van-tabbar-item').filter({ hasText: '订单' })).toHaveClass(
+      /van-tabbar-item--active/
+    )
   })
 })
 
@@ -229,9 +229,9 @@ test.describe('订单详情页面', () => {
               requirements: '蓝色双马尾，长度到腰部',
               reference_images: [],
               notes: [],
-              created_at: new Date().toISOString(),
-            },
-          }),
+              created_at: new Date().toISOString()
+            }
+          })
         })
       } else {
         await route.continue()

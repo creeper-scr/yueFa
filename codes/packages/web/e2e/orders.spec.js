@@ -176,9 +176,9 @@ test.describe('询价管理', () => {
             code: 0,
             data: {
               list: mockData.inquiries,
-              pagination: { page: 1, limit: 20, total: 1 },
-            },
-          }),
+              pagination: { page: 1, limit: 20, total: 1 }
+            }
+          })
         })
       } else {
         await route.continue()
@@ -203,9 +203,9 @@ test.describe('询价管理', () => {
             code: 0,
             data: {
               list: mockData.inquiries,
-              pagination: { page: 1, limit: 20, total: 1 },
-            },
-          }),
+              pagination: { page: 1, limit: 20, total: 1 }
+            }
+          })
         })
       } else {
         await route.continue()

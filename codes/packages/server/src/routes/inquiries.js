@@ -12,7 +12,8 @@ const router = express.Router()
 const WIG_SOURCES = ['client_sends', 'stylist_buys']
 
 // 客户提交询价 (PRD F-01 结构化表单)
-router.post('/',
+router.post(
+  '/',
   body('user_slug').notEmpty().withMessage('目标毛娘不能为空'),
   body('character_name').notEmpty().withMessage('角色名不能为空'),
   body('wig_source').optional().isIn(WIG_SOURCES).withMessage('无效的毛坯来源'),
@@ -71,12 +72,19 @@ router.post('/',
 )
 
 // 获取询价列表 (毛娘端)
-router.get('/', auth,
+router.get(
+  '/',
+  auth,
   query('status').optional().isIn(['new', 'quoted', 'converted', 'rejected']),
   query('page').optional().isInt({ min: 1 }),
   query('limit').optional().isInt({ min: 1, max: 100 }),
   async (req, res, next) => {
     try {
+      const errors = validationResult(req)
+      if (!errors.isEmpty()) {
+        throw new AppError(1001, '数据验证失败', 400, errors.array())
+      }
+
       const { status, page = 1, limit = 20 } = req.query
 
       const inquiries = InquiryModel.findByUserId(req.user.userId, {
@@ -130,7 +138,9 @@ router.get('/:id', auth, async (req, res, next) => {
 })
 
 // 提交报价 (PRD F-02)
-router.post('/:id/quote', auth,
+router.post(
+  '/:id/quote',
+  auth,
   body('price').isNumeric().withMessage('价格不能为空'),
   body('deadline').optional().isISO8601(),
   body('notes').optional().isString(),
@@ -184,7 +194,9 @@ router.post('/:id/quote', auth,
 )
 
 // 将询价转为订单 (PRD 2.0 升级)
-router.post('/:id/convert', auth,
+router.post(
+  '/:id/convert',
+  auth,
   body('price').isNumeric().withMessage('价格不能为空'),
   body('deadline').optional().isISO8601(),
   async (req, res, next) => {

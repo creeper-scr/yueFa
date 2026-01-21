@@ -8,7 +8,9 @@
 
     <!-- 加载中 -->
     <div v-if="loading" class="loading-container">
-      <van-loading size="24px" vertical>加载中...</van-loading>
+      <van-loading size="24px" vertical>
+        加载中...
+      </van-loading>
     </div>
 
     <template v-else-if="order">
@@ -24,8 +26,12 @@
         <van-cell-group inset>
           <van-cell title="验收状态">
             <template #value>
-              <van-tag v-if="existingReview.is_approved" type="success">已通过</van-tag>
-              <van-tag v-else type="warning">等待客户确认</van-tag>
+              <van-tag v-if="existingReview.is_approved" type="success">
+                已通过
+              </van-tag>
+              <van-tag v-else type="warning">
+                等待客户确认
+              </van-tag>
             </template>
           </van-cell>
           <van-cell title="修改次数" :value="`${existingReview.revision_count}/${existingReview.max_revisions}`" />
@@ -145,7 +151,12 @@
           rows="2"
         />
         <div class="popup-actions">
-          <van-button block type="primary" :loading="submittingRevision" @click="submitRevision">
+          <van-button
+            block
+            type="primary"
+            :loading="submittingRevision"
+            @click="submitRevision"
+          >
             提交修改
           </van-button>
         </div>
@@ -217,7 +228,7 @@ const loadData = async () => {
     if (reviewRes.code === 0 && reviewRes.data) {
       existingReview.value = reviewRes.data
     }
-  } catch (err) {
+  } catch (_err) {
     showFailToast('加载失败')
   } finally {
     loading.value = false
@@ -258,7 +269,7 @@ const handleSubmit = async () => {
     } else {
       showFailToast(res.message || '创建失败')
     }
-  } catch (err) {
+  } catch (_err) {
     showFailToast('创建失败')
   } finally {
     submitting.value = false
@@ -312,7 +323,7 @@ const submitRevision = async () => {
     } else {
       showFailToast(res.message || '提交失败')
     }
-  } catch (err) {
+  } catch (_err) {
     showFailToast('提交失败')
   } finally {
     submittingRevision.value = false

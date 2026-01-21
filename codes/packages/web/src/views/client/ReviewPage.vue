@@ -4,7 +4,9 @@
 
     <!-- 加载中 -->
     <div v-if="loading" class="loading-container">
-      <van-loading size="24px" vertical>加载中...</van-loading>
+      <van-loading size="24px" vertical>
+        加载中...
+      </van-loading>
     </div>
 
     <!-- 错误状态 -->
@@ -16,15 +18,19 @@
     <template v-else-if="review">
       <!-- 订单信息 -->
       <div class="order-info">
-        <div class="character-name">{{ review.order?.character_name }}</div>
-        <div class="source-work" v-if="review.order?.source_work">
+        <div class="character-name">
+          {{ review.order?.character_name }}
+        </div>
+        <div v-if="review.order?.source_work" class="source-work">
           {{ review.order.source_work }}
         </div>
       </div>
 
       <!-- 成品图片 -->
       <div class="images-section">
-        <h3 class="section-title">成品展示</h3>
+        <h3 class="section-title">
+          成品展示
+        </h3>
         <div class="images-grid">
           <van-image
             v-for="(img, index) in review.images"
@@ -34,7 +40,7 @@
             @click="previewImage(index)"
           />
         </div>
-        <p class="description" v-if="review.description">
+        <p v-if="review.description" class="description">
           {{ review.description }}
         </p>
       </div>
@@ -48,7 +54,9 @@
 
       <!-- 修改记录 -->
       <div v-if="review.revisions?.length > 0" class="revisions-section">
-        <h3 class="section-title">修改记录</h3>
+        <h3 class="section-title">
+          修改记录
+        </h3>
         <div
           v-for="revision in review.revisions"
           :key="revision.revision_number"
@@ -56,8 +64,12 @@
         >
           <div class="revision-header">
             <span class="revision-num">第{{ revision.revision_number }}次修改</span>
-            <van-tag v-if="revision.completed_at" type="success" size="small">已处理</van-tag>
-            <van-tag v-else type="warning" size="small">处理中</van-tag>
+            <van-tag v-if="revision.completed_at" type="success" size="small">
+              已处理
+            </van-tag>
+            <van-tag v-else type="warning" size="small">
+              处理中
+            </van-tag>
           </div>
           <div class="revision-request">
             <strong>修改意见：</strong>{{ revision.request_content }}
@@ -75,8 +87,8 @@
           block
           round
           size="large"
-          @click="handleApprove"
           :loading="approving"
+          @click="handleApprove"
         >
           确认满意，去付尾款
         </van-button>
@@ -87,8 +99,8 @@
           block
           round
           size="large"
-          @click="showRevisionDialog = true"
           class="revision-btn"
+          @click="showRevisionDialog = true"
         >
           申请修改 (剩余{{ remainingRevisions }}次)
         </van-button>
@@ -167,7 +179,7 @@ const loadReview = async () => {
     } else {
       error.value = true
     }
-  } catch (err) {
+  } catch (_err) {
     error.value = true
   } finally {
     loading.value = false
@@ -192,7 +204,7 @@ const handleApprove = async () => {
     } else {
       showFailToast(res.message || '操作失败')
     }
-  } catch (err) {
+  } catch (_err) {
     showFailToast('操作失败')
   } finally {
     approving.value = false
@@ -226,7 +238,7 @@ const handleRevisionSubmit = async (action) => {
       showFailToast(res.message || '提交失败')
       return false
     }
-  } catch (err) {
+  } catch (_err) {
     showFailToast('提交失败')
     return false
   }

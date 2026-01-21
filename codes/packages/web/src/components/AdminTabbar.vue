@@ -1,8 +1,14 @@
 <template>
   <van-tabbar v-model="active" route>
-    <van-tabbar-item to="/admin/orders" icon="orders-o">订单</van-tabbar-item>
-    <van-tabbar-item to="/admin/works" icon="photo-o">作品</van-tabbar-item>
-    <van-tabbar-item to="/admin/profile" icon="user-o">主页</van-tabbar-item>
+    <van-tabbar-item to="/admin/orders" icon="orders-o">
+      订单
+    </van-tabbar-item>
+    <van-tabbar-item to="/admin/works" icon="photo-o">
+      作品
+    </van-tabbar-item>
+    <van-tabbar-item to="/admin/profile" icon="user-o">
+      主页
+    </van-tabbar-item>
   </van-tabbar>
 </template>
 

@@ -19,30 +19,30 @@
     <div class="card-body">
       <div class="character-info">
         <span class="character-name">{{ order.character_name }}</span>
-        <span class="source-work" v-if="order.source_work">{{ order.source_work }}</span>
+        <span v-if="order.source_work" class="source-work">{{ order.source_work }}</span>
       </div>
 
       <div class="order-meta">
-        <div class="meta-item" v-if="order.deadline" :class="deadlineAlertClass">
+        <div v-if="order.deadline" class="meta-item" :class="deadlineAlertClass">
           <van-icon name="clock-o" />
           <span>{{ formatDate(order.deadline) }}</span>
           <span v-if="daysLeft !== null" class="days-left">
             ({{ daysLeft <= 0 ? '已到期' : `${daysLeft}天` }})
           </span>
         </div>
-        <div class="meta-item" v-if="order.price">
+        <div v-if="order.price" class="meta-item">
           <van-icon name="gold-coin-o" />
           <span>¥{{ order.price }}</span>
         </div>
         <!-- 毛坯来源 -->
-        <div class="meta-item" v-if="order.wig_source">
+        <div v-if="order.wig_source" class="meta-item">
           <van-icon name="gift-o" />
           <span>{{ order.wig_source === 'client_sends' ? '客户寄' : '代购' }}</span>
         </div>
       </div>
     </div>
 
-    <div class="card-footer" v-if="showActions && availableActions.length > 0">
+    <div v-if="showActions && availableActions.length > 0" class="card-footer">
       <van-button
         v-for="action in availableActions"
         :key="action.action"

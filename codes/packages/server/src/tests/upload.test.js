@@ -102,13 +102,11 @@ describe('Upload API', () => {
     })
 
     it('应该拒绝未认证的请求', async () => {
-      const res = await request(app)
-        .post('/api/v1/upload/presign')
-        .send({
-          type: 'work',
-          filename: 'test.jpg',
-          content_type: 'image/jpeg'
-        })
+      const res = await request(app).post('/api/v1/upload/presign').send({
+        type: 'work',
+        filename: 'test.jpg',
+        content_type: 'image/jpeg'
+      })
 
       expect(res.body.code).toBe(2001)
     })

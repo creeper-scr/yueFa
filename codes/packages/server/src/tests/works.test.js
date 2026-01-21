@@ -38,9 +38,7 @@ describe('Works API', () => {
           tags: ['长发', '渐变紫']
         })
 
-      const res = await request(app)
-        .get('/api/v1/works')
-        .set('Authorization', `Bearer ${token}`)
+      const res = await request(app).get('/api/v1/works').set('Authorization', `Bearer ${token}`)
 
       expect(res.status).toBe(200)
       expect(res.body.code).toBe(0)
@@ -49,9 +47,7 @@ describe('Works API', () => {
     })
 
     it('应该返回空数组当没有作品时', async () => {
-      const res = await request(app)
-        .get('/api/v1/works')
-        .set('Authorization', `Bearer ${token}`)
+      const res = await request(app).get('/api/v1/works').set('Authorization', `Bearer ${token}`)
 
       expect(res.status).toBe(200)
       expect(res.body.code).toBe(0)
@@ -92,12 +88,10 @@ describe('Works API', () => {
     })
 
     it('应该拒绝未认证的请求', async () => {
-      const res = await request(app)
-        .post('/api/v1/works')
-        .send({
-          image_url: 'https://example.com/work.jpg',
-          title: '胡桃'
-        })
+      const res = await request(app).post('/api/v1/works').send({
+        image_url: 'https://example.com/work.jpg',
+        title: '胡桃'
+      })
 
       expect(res.body.code).toBe(2001)
     })
@@ -181,7 +175,7 @@ describe('Works API', () => {
       const listRes = await request(app)
         .get('/api/v1/works')
         .set('Authorization', `Bearer ${token}`)
-      expect(listRes.body.data.find(w => w.id === workId)).toBeUndefined()
+      expect(listRes.body.data.find((w) => w.id === workId)).toBeUndefined()
     })
 
     it('应该拒绝无权限删除他人作品', async () => {
@@ -244,26 +238,19 @@ describe('Works API', () => {
   describe('GET /api/v1/users/:slug/works', () => {
     beforeEach(async () => {
       // 创建几个作品
-      await request(app)
-        .post('/api/v1/works')
-        .set('Authorization', `Bearer ${token}`)
-        .send({
-          image_url: 'https://example.com/work1.jpg',
-          title: '公开作品1'
-        })
+      await request(app).post('/api/v1/works').set('Authorization', `Bearer ${token}`).send({
+        image_url: 'https://example.com/work1.jpg',
+        title: '公开作品1'
+      })
 
-      await request(app)
-        .post('/api/v1/works')
-        .set('Authorization', `Bearer ${token}`)
-        .send({
-          image_url: 'https://example.com/work2.jpg',
-          title: '公开作品2'
-        })
+      await request(app).post('/api/v1/works').set('Authorization', `Bearer ${token}`).send({
+        image_url: 'https://example.com/work2.jpg',
+        title: '公开作品2'
+      })
     })
 
     it('应该返回公开作品列表', async () => {
-      const res = await request(app)
-        .get('/api/v1/users/test_works_user/works')
+      const res = await request(app).get('/api/v1/users/test_works_user/works')
 
       expect(res.status).toBe(200)
       expect(res.body.code).toBe(0)
@@ -272,8 +259,7 @@ describe('Works API', () => {
     })
 
     it('应该返回404对于不存在的slug', async () => {
-      const res = await request(app)
-        .get('/api/v1/users/nonexistent/works')
+      const res = await request(app).get('/api/v1/users/nonexistent/works')
 
       expect(res.body.code).toBe(3001)
     })

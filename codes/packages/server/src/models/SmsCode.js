@@ -1,4 +1,4 @@
-import { selectOne, selectQuery, runQuery } from './index.js'
+import { selectOne, runQuery } from './index.js'
 import { v4 as uuidv4 } from 'uuid'
 
 export const SmsCodeModel = {
@@ -12,10 +12,13 @@ export const SmsCodeModel = {
     runQuery('DELETE FROM sms_codes WHERE phone = ? AND used = 0', [phone])
 
     // 创建新验证码
-    runQuery(`
+    runQuery(
+      `
       INSERT INTO sms_codes (id, phone, code, expires_at, created_at)
       VALUES (?, ?, ?, ?, ?)
-    `, [id, phone, code, expiresAt, now])
+    `,
+      [id, phone, code, expiresAt, now]
+    )
 
     return { id, phone, code, expires_at: expiresAt }
   },
@@ -24,12 +27,15 @@ export const SmsCodeModel = {
   verify(phone, code) {
     const now = new Date().toISOString()
 
-    const record = selectOne(`
+    const record = selectOne(
+      `
       SELECT * FROM sms_codes
       WHERE phone = ? AND code = ? AND used = 0 AND expires_at > ?
       ORDER BY created_at DESC
       LIMIT 1
-    `, [phone, code, now])
+    `,
+      [phone, code, now]
+    )
 
     if (!record) return false
 
@@ -43,11 +49,14 @@ export const SmsCodeModel = {
   canSend(phone) {
     const oneMinuteAgo = new Date(Date.now() - 60 * 1000).toISOString()
 
-    const record = selectOne(`
+    const record = selectOne(
+      `
       SELECT * FROM sms_codes
       WHERE phone = ? AND created_at > ?
       LIMIT 1
-    `, [phone, oneMinuteAgo])
+    `,
+      [phone, oneMinuteAgo]
+    )
 
     return !record
   }

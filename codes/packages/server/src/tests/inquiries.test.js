@@ -4,8 +4,8 @@ import { app } from '../app.js'
 import { SmsCodeModel } from '../models/SmsCode.js'
 
 describe('Inquiries API', () => {
-  const testPhone = '13800138003'  // 唯一手机号，避免与其他测试冲突
-  const testSlug = 'test_inquiries_user'  // 唯一 slug
+  const testPhone = '13800138003' // 唯一手机号，避免与其他测试冲突
+  const testSlug = 'test_inquiries_user' // 唯一 slug
   let token
   let userId
   let inquiryId
@@ -50,67 +50,57 @@ describe('Inquiries API', () => {
     })
 
     it('应该成功提交包含毛坯来源的询价 (PRD F-03)', async () => {
-      const res = await request(app)
-        .post('/api/v1/inquiries')
-        .send({
-          user_slug: testSlug,
-          customer_name: '测试客户',
-          customer_contact: 'wx: test123',
-          character_name: '胡桃',
-          source_work: '原神',
-          wig_source: 'client_sends',
-          head_circumference: '56cm',
-          head_notes: '头型偏扁，后脑勺平'
-        })
+      const res = await request(app).post('/api/v1/inquiries').send({
+        user_slug: testSlug,
+        customer_name: '测试客户',
+        customer_contact: 'wx: test123',
+        character_name: '胡桃',
+        source_work: '原神',
+        wig_source: 'client_sends',
+        head_circumference: '56cm',
+        head_notes: '头型偏扁，后脑勺平'
+      })
 
       expect(res.status).toBe(200)
       expect(res.body.code).toBe(0)
     })
 
     it('应该成功提交毛娘代购的询价', async () => {
-      const res = await request(app)
-        .post('/api/v1/inquiries')
-        .send({
-          user_slug: testSlug,
-          customer_name: '测试客户',
-          character_name: '甘雨',
-          wig_source: 'stylist_buys'
-        })
+      const res = await request(app).post('/api/v1/inquiries').send({
+        user_slug: testSlug,
+        customer_name: '测试客户',
+        character_name: '甘雨',
+        wig_source: 'stylist_buys'
+      })
 
       expect(res.status).toBe(200)
       expect(res.body.code).toBe(0)
     })
 
     it('应该拒绝无效的毛坯来源', async () => {
-      const res = await request(app)
-        .post('/api/v1/inquiries')
-        .send({
-          user_slug: testSlug,
-          character_name: '胡桃',
-          wig_source: 'invalid_source'
-        })
+      const res = await request(app).post('/api/v1/inquiries').send({
+        user_slug: testSlug,
+        character_name: '胡桃',
+        wig_source: 'invalid_source'
+      })
 
       expect(res.body.code).toBe(1001)
     })
 
     it('应该拒绝缺少必填字段', async () => {
-      const res = await request(app)
-        .post('/api/v1/inquiries')
-        .send({
-          user_slug: 'test_maoyang'
-          // 缺少 character_name
-        })
+      const res = await request(app).post('/api/v1/inquiries').send({
+        user_slug: 'test_maoyang'
+        // 缺少 character_name
+      })
 
       expect(res.body.code).toBe(1001)
     })
 
     it('应该拒绝不存在的毛娘', async () => {
-      const res = await request(app)
-        .post('/api/v1/inquiries')
-        .send({
-          user_slug: 'nonexistent_user',
-          character_name: '胡桃'
-        })
+      const res = await request(app).post('/api/v1/inquiries').send({
+        user_slug: 'nonexistent_user',
+        character_name: '胡桃'
+      })
 
       expect(res.body.code).toBe(3001)
     })
@@ -119,21 +109,17 @@ describe('Inquiries API', () => {
   describe('GET /api/v1/inquiries', () => {
     beforeEach(async () => {
       // 创建几个询价
-      await request(app)
-        .post('/api/v1/inquiries')
-        .send({
-          user_slug: testSlug,
-          customer_name: '客户1',
-          character_name: '胡桃'
-        })
+      await request(app).post('/api/v1/inquiries').send({
+        user_slug: testSlug,
+        customer_name: '客户1',
+        character_name: '胡桃'
+      })
 
-      await request(app)
-        .post('/api/v1/inquiries')
-        .send({
-          user_slug: testSlug,
-          customer_name: '客户2',
-          character_name: '甘雨'
-        })
+      await request(app).post('/api/v1/inquiries').send({
+        user_slug: testSlug,
+        customer_name: '客户2',
+        character_name: '甘雨'
+      })
     })
 
     it('应该返回询价列表', async () => {
@@ -153,7 +139,7 @@ describe('Inquiries API', () => {
         .set('Authorization', `Bearer ${token}`)
 
       expect(res.body.code).toBe(0)
-      expect(res.body.data.list.every(i => i.status === 'new')).toBe(true)
+      expect(res.body.data.list.every((i) => i.status === 'new')).toBe(true)
     })
 
     it('应该支持分页', async () => {
@@ -169,16 +155,14 @@ describe('Inquiries API', () => {
 
   describe('GET /api/v1/inquiries/:id', () => {
     beforeEach(async () => {
-      const createRes = await request(app)
-        .post('/api/v1/inquiries')
-        .send({
-          user_slug: testSlug,
-          customer_name: '测试客户',
-          character_name: '胡桃',
-          wig_source: 'client_sends',
-          head_circumference: '56cm',
-          head_notes: '头型偏扁'
-        })
+      const createRes = await request(app).post('/api/v1/inquiries').send({
+        user_slug: testSlug,
+        customer_name: '测试客户',
+        character_name: '胡桃',
+        wig_source: 'client_sends',
+        head_circumference: '56cm',
+        head_notes: '头型偏扁'
+      })
       inquiryId = createRes.body.data.id
     })
 
@@ -228,13 +212,11 @@ describe('Inquiries API', () => {
 
   describe('POST /api/v1/inquiries/:id/quote (PRD F-02 报价)', () => {
     beforeEach(async () => {
-      const createRes = await request(app)
-        .post('/api/v1/inquiries')
-        .send({
-          user_slug: testSlug,
-          customer_name: '测试客户',
-          character_name: '胡桃'
-        })
+      const createRes = await request(app).post('/api/v1/inquiries').send({
+        user_slug: testSlug,
+        customer_name: '测试客户',
+        character_name: '胡桃'
+      })
       inquiryId = createRes.body.data.id
     })
 
@@ -247,8 +229,8 @@ describe('Inquiries API', () => {
       expect(res.status).toBe(200)
       expect(res.body.code).toBe(0)
       expect(res.body.data.price).toBe(500)
-      expect(res.body.data.deposit).toBe(100)  // 20%
-      expect(res.body.data.balance).toBe(400)  // 80%
+      expect(res.body.data.deposit).toBe(100) // 20%
+      expect(res.body.data.balance).toBe(400) // 80%
     })
 
     it('应该拒绝已处理的询价报价', async () => {
@@ -270,18 +252,16 @@ describe('Inquiries API', () => {
 
   describe('POST /api/v1/inquiries/:id/convert', () => {
     beforeEach(async () => {
-      const createRes = await request(app)
-        .post('/api/v1/inquiries')
-        .send({
-          user_slug: testSlug,
-          customer_name: '测试客户',
-          customer_contact: 'wx: test',
-          character_name: '胡桃',
-          source_work: '原神',
-          wig_source: 'client_sends',
-          head_circumference: '56cm',
-          head_notes: '头型偏扁'
-        })
+      const createRes = await request(app).post('/api/v1/inquiries').send({
+        user_slug: testSlug,
+        customer_name: '测试客户',
+        customer_contact: 'wx: test',
+        character_name: '胡桃',
+        source_work: '原神',
+        wig_source: 'client_sends',
+        head_circumference: '56cm',
+        head_notes: '头型偏扁'
+      })
       inquiryId = createRes.body.data.id
     })
 
@@ -319,8 +299,8 @@ describe('Inquiries API', () => {
         .set('Authorization', `Bearer ${token}`)
         .send({ price: 500 })
 
-      expect(res.body.data.deposit).toBe(100)  // 500 * 20%
-      expect(res.body.data.balance).toBe(400)  // 500 * 80%
+      expect(res.body.data.deposit).toBe(100) // 500 * 20%
+      expect(res.body.data.balance).toBe(400) // 500 * 80%
     })
 
     it('应该拒绝已转换的询价', async () => {
@@ -358,13 +338,11 @@ describe('Inquiries API', () => {
 
   describe('PUT /api/v1/inquiries/:id/reject', () => {
     beforeEach(async () => {
-      const createRes = await request(app)
-        .post('/api/v1/inquiries')
-        .send({
-          user_slug: testSlug,
-          customer_name: '测试客户',
-          character_name: '胡桃'
-        })
+      const createRes = await request(app).post('/api/v1/inquiries').send({
+        user_slug: testSlug,
+        customer_name: '测试客户',
+        character_name: '胡桃'
+      })
       inquiryId = createRes.body.data.id
     })
 

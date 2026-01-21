@@ -5,7 +5,9 @@
 
     <!-- 错误状态 -->
     <van-empty v-else-if="error" :description="error">
-      <van-button type="primary" size="small" @click="fetchData">重新加载</van-button>
+      <van-button type="primary" size="small" @click="fetchData">
+        重新加载
+      </van-button>
     </van-empty>
 
     <!-- 主内容 -->
@@ -20,8 +22,10 @@
           class="avatar"
         />
         <div class="profile-info">
-          <h1 class="nickname">{{ profile.nickname || '毛娘店铺' }}</h1>
-          <div class="wechat" v-if="profile.wechat_id" @click="copyWechat">
+          <h1 class="nickname">
+            {{ profile.nickname || '毛娘店铺' }}
+          </h1>
+          <div v-if="profile.wechat_id" class="wechat" @click="copyWechat">
             <van-icon name="chat-o" />
             <span>{{ profile.wechat_id }}</span>
             <van-icon name="guide-o" size="12" />
@@ -30,7 +34,7 @@
       </div>
 
       <!-- 公告 -->
-      <div class="announcement" v-if="profile.announcement">
+      <div v-if="profile.announcement" class="announcement">
         <van-notice-bar
           :text="profile.announcement"
           left-icon="volume-o"
@@ -54,8 +58,13 @@
     </template>
 
     <!-- 底部询价按钮 -->
-    <div class="bottom-action" v-if="!loading && !error && activeTab === 0">
-      <van-button type="primary" round block @click="activeTab = 1">
+    <div v-if="!loading && !error && activeTab === 0" class="bottom-action">
+      <van-button
+        type="primary"
+        round
+        block
+        @click="activeTab = 1"
+      >
         我要询价
       </van-button>
     </div>

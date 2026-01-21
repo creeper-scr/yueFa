@@ -70,15 +70,26 @@
       </van-cell-group>
 
       <div class="submit-btn">
-        <van-button round block type="primary" native-type="submit" :loading="loading">
+        <van-button
+          round
+          block
+          type="primary"
+          native-type="submit"
+          :loading="loading"
+        >
           保存
         </van-button>
       </div>
 
       <!-- 分享链接 -->
-      <div class="share-section" v-if="form.slug">
+      <div v-if="form.slug" class="share-section">
         <van-cell-group inset>
-          <van-cell title="我的主页链接" :value="shareUrl" is-link @click="copyShareUrl" />
+          <van-cell
+            title="我的主页链接"
+            :value="shareUrl"
+            is-link
+            @click="copyShareUrl"
+          />
         </van-cell-group>
       </div>
     </van-form>
@@ -116,7 +127,7 @@ const fetchProfile = async () => {
     if (res.code === 0) {
       Object.assign(form, res.data)
     }
-  } catch (error) {
+  } catch (_error) {
     showToast('加载失败')
   }
 }
@@ -134,8 +145,8 @@ const handleSubmit = async () => {
     if (res.code === 0) {
       showSuccessToast('保存成功')
     }
-  } catch (error) {
-    showToast(error.message || '保存失败')
+  } catch (_error) {
+    showToast('保存失败')
   } finally {
     loading.value = false
   }

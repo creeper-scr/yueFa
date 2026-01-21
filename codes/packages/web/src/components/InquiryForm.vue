@@ -1,5 +1,5 @@
 <template>
-  <van-form @submit="handleSubmit" class="inquiry-form">
+  <van-form class="inquiry-form" @submit="handleSubmit">
     <van-cell-group inset>
       <van-field
         v-model="form.customer_name"
@@ -66,8 +66,12 @@
       <van-field name="wig_source" label="毛坯来源">
         <template #input>
           <van-radio-group v-model="form.wig_source" direction="horizontal">
-            <van-radio name="client_sends">我来寄</van-radio>
-            <van-radio name="stylist_buys">毛娘代购</van-radio>
+            <van-radio name="client_sends">
+              我来寄
+            </van-radio>
+            <van-radio name="stylist_buys">
+              毛娘代购
+            </van-radio>
           </van-radio-group>
         </template>
       </van-field>
@@ -105,7 +109,13 @@
     </van-cell-group>
 
     <div class="submit-btn">
-      <van-button round block type="primary" native-type="submit" :loading="loading">
+      <van-button
+        round
+        block
+        type="primary"
+        native-type="submit"
+        :loading="loading"
+      >
         提交询价
       </van-button>
     </div>

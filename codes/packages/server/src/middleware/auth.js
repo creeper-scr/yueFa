@@ -35,7 +35,7 @@ export const optionalAuth = (req, res, next) => {
       req.user = decoded
     }
     next()
-  } catch (error) {
+  } catch (_error) {
     // 忽略验证错误，继续执行
     next()
   }
